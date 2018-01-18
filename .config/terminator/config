@@ -1,0 +1,19 @@
+[global_config]
+  focus = mouse
+[keybindings]
+[layouts]
+  [[default]]
+    [[[child1]]]
+      parent = window0
+      type = Terminal
+    [[[window0]]]
+      parent = ""
+      type = Window
+[plugins]
+[profiles]
+  [[default]]
+    background_type = transparent
+    cursor_color = "#aaaaaa"
+    font = DejaVu Sans Mono 11
+    scrollback_lines = 5000
+    use_system_font = False

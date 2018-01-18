@@ -1,0 +1,29 @@
+{
+    // workspace with 1 children
+    "border": "normal",
+    "floating": "auto_off",
+    "layout": "splitv",
+    "percent": 0.333333333333333,
+    "type": "con",
+    "nodes": [
+        {
+            "border": "normal",
+            "current_border_width": 2,
+            "floating": "auto_off",
+            "geometry": {
+               "height": 880,
+               "width": 1596,
+               "x": 2,
+               "y": 18
+            },
+            "name": "browser",
+            "percent": 1,
+            "swallows": [
+               {
+                   "class": "^Google-chrome$"
+               }
+            ],
+            "type": "con"
+        }
+    ]
+}
