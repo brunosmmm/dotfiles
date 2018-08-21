@@ -1,8 +1,8 @@
-package argu
+package cd
 package emacs
-package expand
+package fasd
 package foreign-env
-package marlin
+package peco
 package pisces
 theme bobthefish
 theme default
