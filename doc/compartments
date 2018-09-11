@@ -1,0 +1,14 @@
+
+work:
+  fedora
+
+personal:
+  fedora
+
+vpn-proxy:
+  private:
+    fedora
+
+  anonymous:
+    whonix
+  

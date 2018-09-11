@@ -1,0 +1,24 @@
+
+global:
+  fish
+  terminator
+  emacs
+  peco
+  the_silver_searcher
+
+main_gui:
+  jgmenu
+  tint2
+  i3
+  bumblebee-status
+  lxrandr
+  rofi
+  onboard
+
+work:
+  xournal
+
+personal:
+  xournal
+  spotify
+  clementine
