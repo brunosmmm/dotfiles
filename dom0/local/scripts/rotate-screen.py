@@ -6,23 +6,6 @@ import sys
 from subprocess import check_call, check_output
 from glob import glob
 
-
-def bdopen(fname):
-    return open(op.join(basedir, fname))
-
-
-def read(fname):
-    return bdopen(fname).read()
-
-
-for basedir in glob('/sys/bus/iio/devices/iio:device*'):
-    if 'accel' in read('name'):
-        break
-else:
-    sys.stderr.write("Can't find an accellerator device!\n")
-    sys.exit(1)
-
-
 devices = check_output(['xinput', '--list', '--name-only']).splitlines()
 
 touchscreen_names = ['touchscreen', 'wacom']
@@ -32,8 +15,6 @@ disable_touchpads = False
 
 touchpad_names = ['touchpad', 'trackpoint']
 touchpads = [i for i in devices if any(j in i.lower() for j in touchpad_names)]
-
-scale = float(read('in_accel_scale'))
 
 g = 7.0  # (m^2 / s) sensibility, gravity trigger
 
@@ -51,7 +32,7 @@ STATES = [
 
 def rotate(state):
     s = STATES[state]
-    check_call(['xrandr', '--output', 'eDP-1', '--rotate', s['rot']])
+    check_call(['xrandr', '--output', 'eDP1', '--rotate', s['rot']])
     for dev in touchscreens if disable_touchpads else (touchscreens + touchpads):
         check_call([
             'xinput', 'set-prop', dev,
@@ -62,21 +43,18 @@ def rotate(state):
             check_call(['xinput', s['touchpad'], dev])
 
 
-def read_accel(fp):
-    fp.seek(0)
-    return float(fp.read()) * scale
+def read_accel():
+    x, y = check_output(['qvm-run', '-p', 'sys-usb', '/home/user/.local/scripts/read-accelerometer.py']).splitlines()
+    return (float(x), float(y))
+
 
 
 if __name__ == '__main__':
 
-    accel_x = bdopen('in_accel_x_raw')
-    accel_y = bdopen('in_accel_y_raw')
-
     current_state = None
 
     while True:
-        x = read_accel(accel_x)
-        y = read_accel(accel_y)
+        x, y = read_accel()
         for i in range(4):
             if i == current_state:
                 continue
