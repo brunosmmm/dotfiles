@@ -22,3 +22,10 @@ personal:
   xournal
   spotify
   clementine
+
+fedora-packages-install:
+  adobe-source-code-pro-fonts
+  gdouros-symbola-fonts
+  fish
+  emacs
+  @C-Development-Tools-and-Libraries
