@@ -1,7 +1,9 @@
-fundle plugin 'tuvistavie/fish-ssh-agent'
+# set path
+set -U fish_user_paths $fish_user_paths ~/.local/bin
 
+# set theme options
 set -g theme_nerd_fonts yes
-set -g theme_display_tasks yes
+set -g theme_display_git_master_branch yes
 
 function fish_user_key_bindings
     bind \cr 'peco_select_history (commandline -b)'
@@ -19,8 +21,5 @@ function fish_title
 end
 
 thefuck --alias | source
-set -x PATH "/home/bruno/.pyenv/bin" $PATH
-status --is-interactive; and . (pyenv init -|psub)
-status --is-interactive; and . (pyenv virtualenv-init -|psub)
 
 eval (python -m virtualfish auto_activation compat_aliases)
