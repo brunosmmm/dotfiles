@@ -5,6 +5,7 @@ from os import path as op
 import sys
 from subprocess import check_call, check_output
 from glob import glob
+from read_accelerometer import read_xy
 
 devices = check_output(['xinput', '--list', '--name-only']).splitlines()
 
@@ -44,7 +45,10 @@ def rotate(state):
 
 
 def read_accel():
-    x, y = check_output(['qvm-run', '-p', 'sys-usb', '/home/user/.local/scripts/read-accelerometer.py']).splitlines()
+    x, y = read_xy()
+    if x is None or y is None:
+        # accelerometer not local
+        x, y = check_output(['qvm-run', '-p', 'sys-usb', '/home/user/.local/scripts/read-accelerometer.py']).splitlines()
     return (float(x), float(y))
 
 
