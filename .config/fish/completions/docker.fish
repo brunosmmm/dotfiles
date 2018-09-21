@@ -1,1 +1,0 @@
-/home/bruno/.config/fisherman/docker-completion/completions/docker.fish
