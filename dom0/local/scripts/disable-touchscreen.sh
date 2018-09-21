@@ -5,9 +5,11 @@
 
 sleeptime="0.3s"
 lastPenPosition="Proximity=Out"
+stylus_name=$(xinput list --name-only | grep "Wacom.*stylus")
+touchscreen_name=$(xinput list --name-only | grep "ELAN.*")
 while true
 do 
-    mssg="`xinput query-state "Wacom ISDv4 EC Pen stylus" | grep Proximity`"
+    mssg="`xinput query-state "$stylus_name" | grep Proximity`"
     if [ ${#mssg} -gt 1 ]
     then
         inout="`echo $mssg | awk '{print $3}'`"
@@ -15,14 +17,14 @@ do
             "Proximity=In" )
                 if [ $lastPenPosition != $inout ]
                 then
-                    xinput --disable "ELAN Touchscreen"
+                    xinput --disable "$touchscreen_name"
                     lastPenPosition=$inout
                 fi
                 ;;
             "Proximity=Out" )
                 if [ $lastPenPosition != $inout ]
                 then
-                    xinput --enable "ELAN Touchscreen"
+                    xinput --enable "$touchscreen_name"
                     lastPenPosition=$inout
                 fi
                 ;;
