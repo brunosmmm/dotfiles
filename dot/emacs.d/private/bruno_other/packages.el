@@ -39,14 +39,14 @@
     (company-jedi :location elpa)
     jedi-direx
     (jedi-direx :location elpa)
-    realgud
-    (realgud :location elpa)
+    ;; realgud
+    ;; (realgud :location elpa)
     ;;flycheck-verilator
     ;;(flycheck-verilator :location local)
     docker-tramp
     (docker-tramp :location local)
-    org-journal
-    (org-journal :location (recipe :fetcher github :repo "bastibe/org-journal"))
+    ;; org-journal
+    ;; (org-journal :location (recipe :fetcher github :repo "bastibe/org-journal"))
     nlinum
     (nlinum :location elpa)
     sc-mode
@@ -83,16 +83,16 @@ Each entry is either:
 (defun bruno_other/init-kivy-mode ()
   (use-package kivy-mode))
 
-(defun bruno_other/init-realgud ()
-  (use-package realgud))
+;; (defun bruno_other/init-realgud ()
+;;   (use-package realgud))
 
 ;;(defun bruno_other/init-flycheck-verilator ()
 ;;  (use-package flycheck-verilator))
 (defun bruno_other/init-docker-tramp ()
   (use-package docker-tramp))
 
-(defun bruno_other/init-org-journal ()
-  (use-package org-journal))
+;; (defun bruno_other/init-org-journal ()
+;;   (use-package org-journal))
 
 (defun bruno_other/init-nlinum ()
   (use-package nlinum))
