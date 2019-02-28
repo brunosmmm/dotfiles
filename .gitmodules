@@ -1,3 +1,0 @@
-[submodule ".emacs.d/private/journal"]
-	path = .emacs.d/private/journal
-	url = https://github.com/borgnix/spacemacs-journal.git
