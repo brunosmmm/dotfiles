@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+"""Update dotfiles from current user's home directory."""
+
+from dotutils.git import GitDotfileInspector
+
+
+if __name__ == "__main__":
+    ins = GitDotfileInspector("../dot", "/home/bruno")
+    fmap = ins.inspect()
+    print(fmap)
