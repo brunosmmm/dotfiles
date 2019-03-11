@@ -2,7 +2,7 @@
 Description=Disable Touchscreen Automatically
 
 [Service]
-Type=OneShot
+Type=simple
 ExecStart=/home/bruno/.local/scripts/disable-touchscreen.sh
 Restart=on-failure
 

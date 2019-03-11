@@ -35,16 +35,14 @@
 
     ;; jedi
     ;; (jedi :location elpa)
-    company-jedi
-    (company-jedi :location elpa)
-    jedi-direx
-    (jedi-direx :location elpa)
+    ;; company-jedi
+    ;; (company-jedi :location elpa)
+    ;; jedi-direx
+    ;;  (jedi-direx :location elpa)
     ;; realgud
     ;; (realgud :location elpa)
     ;;flycheck-verilator
     ;;(flycheck-verilator :location local)
-    docker-tramp
-    (docker-tramp :location local)
     ;; org-journal
     ;; (org-journal :location (recipe :fetcher github :repo "bastibe/org-journal"))
     nlinum
@@ -88,8 +86,6 @@ Each entry is either:
 
 ;;(defun bruno_other/init-flycheck-verilator ()
 ;;  (use-package flycheck-verilator))
-(defun bruno_other/init-docker-tramp ()
-  (use-package docker-tramp))
 
 ;; (defun bruno_other/init-org-journal ()
 ;;   (use-package org-journal))
@@ -106,11 +102,11 @@ Each entry is either:
 ;; (defun bruno_other/init-jedi ()
 ;;   (use-package jedi))
 
-(defun bruno_other/init-jedi-direx ()
-  (use-package jedi-direx))
+;; (defun bruno_other/init-jedi-direx ()
+;;    (use-package jedi-direx))
 
-(defun bruno_other/init-company-jedi ()
-  (use-package company-jedi))
+;; (defun bruno_other/init-company-jedi ()
+;;   (use-package company-jedi))
 
 
 ;;; packages.el ends here

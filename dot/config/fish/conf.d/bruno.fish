@@ -8,7 +8,7 @@ eval (python -m virtualfish auto_activation projects)
 
 # paths
 set -x GOPATH /home/bruno/.go
-set -gx PATH /home/bruno/.local/bin:/home/bruno/.gem/ruby/2.6.0/bin $PATH
+set -gx PATH /home/bruno/.local/bin:/home/bruno/.gem/ruby/2.6.0/bin:/home/bruno/.yarn/bin $PATH
 
 # editor
 set -x EDITOR (which vim)

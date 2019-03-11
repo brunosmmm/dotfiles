@@ -4,9 +4,9 @@
 
 ;; enable fill ruler
 (spacemacs/add-to-hooks 'spacemacs/toggle-fill-column-indicator-on
-                        '(python-mode-hook))
-(spacemacs/add-to-hooks 'nlinum-mode
                         '(python-mode-hook c-mode-hook))
+(spacemacs/add-to-hooks 'nlinum-mode
+                        '(c-mode-hook))
 
 (setq auto-mode-alist (cons '("\\.sc\\'" . c-mode) auto-mode-alist))
 (setq auto-mode-alist (cons '("\\.sx\\'" . c-mode) auto-mode-alist))

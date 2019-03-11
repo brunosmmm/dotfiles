@@ -43,7 +43,7 @@ values."
      auto-completion
      git
      github
-     (python :variables python-test-runner 'nose)
+     (python :variables python-test-runner 'nose python-backend 'lsp)
      (c-c++ :variables c-c++-enable-clang-support t)
      latex
      bibtex
@@ -55,6 +55,7 @@ values."
      cscope
      semantic
      syntax-checking
+     spell-checking
      spotify
      (shell :variables shell-default-term-shell "/usr/bin/fish")
      ;; journal
@@ -62,6 +63,10 @@ values."
      slack
      ibuffer
      imenu-list
+     docker
+     systemd
+     lsp
+     ;; ycmd
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -69,7 +74,9 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(
                                       (sedona-mode :location
-                                                   (recipe :fetcher github :repo "brunosmmm/sedona-mode")))
+                                                   (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
+                                      (blacken :location
+                                               (recipe :fetcher github :repo "proofit404/blacken")))
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -141,8 +148,8 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(spacemacs-dark
-                         spacemacs-light)
+   dotspacemacs-themes '(monokai
+                         adwaita)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
@@ -397,9 +404,26 @@ you should place your code here."
   ;; put project TODOs in org file
   (with-eval-after-load 'org-agenda
     (require 'org-projectile)
-    (push (org-projectile:todo-files) org-agenda-files))
+    (mapcar '(lambda (file)
+               (when (file-exists-p file)
+                 (push file org-agenda-files)))
+            (org-projectile-todo-files)))
 
+  ;; auto-format python
+  (add-hook 'python-mode-hook 'blacken-mode)
+  (setq blacken-line-length 80)
+
+  ;; ycmd
+  ;; (setq ycmd-server-command '("python" "/usr/share/ycmd/ycmd"))
+  ;; (setq ycmd-force-semantic-completion t)
+
+  ;; (setq ycmd--log-enabled t)
+  ;; (add-hook 'python-mode-hook 'ycmd-mode)
+  ;; (eval-after-load "company"
+  ;;   '(add-to-list 'company-backends 'company-jedi))
   )
+
+(setq spaceline-org-clock-p t)
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
