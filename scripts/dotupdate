@@ -3,6 +3,7 @@
 
 from dotutils.git import GitDotfileInspector
 import shutil
+import os
 
 
 if __name__ == "__main__":
@@ -12,11 +13,20 @@ if __name__ == "__main__":
     ins = GitDotfileInspector("../dot", "/home/bruno")
     changes = ins.determine_changes()
 
-    print("{} files have changed".format(len(changes)))
+    print(
+        "{} files have changed".format(
+            "No" if len(changes) == 0 else len(changes)
+        )
+    )
+    if len(changes) == 0:
+        exit(0)
     choice = input("Update repository?")
     if choice == "y":
         # update
         for repo_file, user_file in changes.items():
+            if os.path.islink(repo_file):
+                # leave symlinks alone
+                continue
             shutil.copyfile(user_file, repo_file, follow_symlinks=False)
     else:
         print("Aborted")
