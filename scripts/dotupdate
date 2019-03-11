@@ -2,9 +2,21 @@
 """Update dotfiles from current user's home directory."""
 
 from dotutils.git import GitDotfileInspector
+import shutil
 
 
 if __name__ == "__main__":
+
+    print("Checking for changes...")
+
     ins = GitDotfileInspector("../dot", "/home/bruno")
-    fmap = ins.inspect()
-    print(fmap)
+    changes = ins.determine_changes()
+
+    print("{} files have changed".format(len(changes)))
+    choice = input("Update repository?")
+    if choice == "y":
+        # update
+        for repo_file, user_file in changes.items():
+            shutil.copyfile(user_file, repo_file, follow_symlinks=False)
+    else:
+        print("Aborted")

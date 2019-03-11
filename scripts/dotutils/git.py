@@ -3,6 +3,7 @@
 import os
 import subprocess
 from . import exceptions
+from .misc import files_differ
 
 
 class GitDotfileInspector:
@@ -62,3 +63,18 @@ class GitDotfileInspector:
                     )
 
         return file_map
+
+    def determine_changes(self):
+        """Determine which files have changed."""
+        file_map = self.inspect()
+
+        changed_files = {}
+        for repo_file, user_file in file_map.items():
+            if not os.path.exists(user_file):
+                # file does not exist, so mark as changed to force copy
+                changed_files[repo_file] = user_file
+                continue
+            if files_differ(repo_file, user_file):
+                changed_files[repo_file] = user_file
+
+        return changed_files
