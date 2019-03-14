@@ -66,6 +66,7 @@ values."
      docker
      systemd
      lsp
+     (plantuml :variables plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar" org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
      ;; ycmd
      )
    ;; List of additional packages that will be installed without being
@@ -421,7 +422,13 @@ you should place your code here."
   ;; (add-hook 'python-mode-hook 'ycmd-mode)
   ;; (eval-after-load "company"
   ;;   '(add-to-list 'company-backends 'company-jedi))
+  (setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
+  (with-eval-after-load 'org
+    (org-babel-do-load-languages 'org-babel-load-languages '((plantuml . t)
+                                                             )))
   )
+
+(setq org-confirm-babel-evaluate nil)
 
 (setq spaceline-org-clock-p t)
 
