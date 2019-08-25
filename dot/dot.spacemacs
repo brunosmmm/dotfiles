@@ -30,7 +30,8 @@ values."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(
+   '(graphviz
+     php
      helm
      emacs-lisp
      yaml
@@ -43,7 +44,7 @@ values."
      auto-completion
      git
      github
-     (python :variables python-test-runner 'nose python-backend 'lsp)
+     (python :variables python-test-runner 'nose python-backend 'lsp python-formatter 'black python-format-on-save t)
      (c-c++ :variables c-c++-enable-clang-support t)
      latex
      bibtex
@@ -68,16 +69,26 @@ values."
      lsp
      (plantuml :variables plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar" org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
      ;; ycmd
-     )
+     (debug :variables debug-additional-debuggers '("ipdb" "pdb" "trepan3k"))
+     neotree
+     dap
+     rust
+     imenu-list
+   )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(
-                                      (sedona-mode :location
-                                                   (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
-                                      (blacken :location
-                                               (recipe :fetcher github :repo "proofit404/blacken")))
+                                      ;; (sedona-mode :location
+                                      ;;              (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
+                                      all-the-icons
+                                      all-the-icons-dired
+                                      spaceline-all-the-icons
+                                      bitbake
+                                      solaire-mode
+                                      doom-themes
+                                      )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -149,8 +160,8 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(monokai
-                         adwaita)
+   dotspacemacs-themes '(doom-molokai
+                         doom-nord-light)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
@@ -159,7 +170,7 @@ values."
                                :size 13
                                :weight normal
                                :width normal
-                               :powerline-scale 1.1)
+                               :powerline-scale 1.0)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -323,6 +334,11 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+  ;; FIXME TEMPORARY
+  (add-to-list 'configuration-layer-elpa-archives '("melpa-stable" . "stable.melpa.org/packages/"))
+  (add-to-list 'package-pinned-packages '(spaceline . "melpa-stable"))
+  (add-to-list 'package-pinned-packages '(spaceline-all-the-icons . "melpa-stable"))
+  (add-to-list 'package-pinned-packages '(all-the-icons . "melpa-stable"))
   )
 
 (defun dotspacemacs/user-config ()
@@ -337,10 +353,6 @@ you should place your code here."
   (global-set-key (kbd "C->") 'mc/mark-next-like-this)
   (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
   (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
-
-  ;;expand-region mode
-  (require 'expand-region)
-  (global-set-key (kbd "C-=") 'er/expand-region)
 
   ;;c++: do not indent inside namespaces
   (c-set-offset 'innamespace 0)
@@ -359,7 +371,7 @@ you should place your code here."
   ;;disable smooth scrolling
   ;;(setq dotspacemacs-smooth-scrolling nil)
   ;;(remove-hook 'spaceline-pre-hook 'spacemacs//prepare-diminish)
-  (setq flycheck-highlighting-mode 'lines)
+  ;; (setq flycheck-highlighting-mode 'lines)
 
   ;;turn off spell checking
   ;;(setq-default dotspacemacs-configuration-layers
@@ -368,30 +380,16 @@ you should place your code here."
   ;;enable global ws-butler
   (ws-butler-global-mode 1)
 
-  ;; if opening a new i3wm session, spawn a new window to satisfy layout configuration
-  (setq i3-session-switch (member "-i3session" command-line-args))
-  (setq command-line-args (delete "-i3session" command-line-args))
-
-  (if i3-session-switch
-      (funcall 'make-frame))
-
   ;; get rid of menu bar
   (menu-bar-mode -1)
 
   ;; global linum mode
   (add-hook 'prog-mode-hook #'display-line-numbers-mode)
 
-  ;;server mode
-  ;;(server-start)
-
-  ;; stupid auctex
-  ;;(setq exec-path (append exec-path '("/usr/local/texlive/2017/bin/x86_64-linux")))
   (require 'helm-bookmark)
 
   ;; focus follows mouse
   (setq mouse-autoselect-window t)
-
-  (add-hook 'term-mode-hook 'toggle-truncate-lines)
 
   ;; imenu
 
@@ -411,26 +409,50 @@ you should place your code here."
             (org-projectile-todo-files)))
 
   ;; auto-format python
-  (add-hook 'python-mode-hook 'blacken-mode)
   (setq blacken-line-length 80)
 
-  ;; ycmd
-  ;; (setq ycmd-server-command '("python" "/usr/share/ycmd/ycmd"))
-  ;; (setq ycmd-force-semantic-completion t)
-
-  ;; (setq ycmd--log-enabled t)
-  ;; (add-hook 'python-mode-hook 'ycmd-mode)
-  ;; (eval-after-load "company"
-  ;;   '(add-to-list 'company-backends 'company-jedi))
   (setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
   (with-eval-after-load 'org
     (org-babel-do-load-languages 'org-babel-load-languages '((plantuml . t)
                                                              )))
+
+  (defadvice virtualenv-activate (after virtual-pdb)
+    (custom-set-variables
+     '(gud-pdb-command-name
+       (concat virtualenv-active "/bin/ipdb" ))))
+
+  (ad-activate 'virtualenv-activate)
+
+  (setq org-confirm-babel-evaluate nil)
+
+  (setq spaceline-org-clock-p t)
+  (setq spaceline-minor-modes-p nil)
+  (setq neo-theme 'icons)
+  (setq powerline-default-separator 'slant)
+  (use-package spaceline-all-the-icons
+    :after spaceline
+    :config
+    (spaceline-all-the-icons-theme)
+    (spaceline-all-the-icons--setup-anzu)
+    (spaceline-all-the-icons--setup-git-ahead)
+    (spaceline-all-the-icons--setup-neotree))
+
+  (require 'dap-lldb)
+
+  (use-package solaire-mode
+    :hook
+    ((change-major-mode after-revert ediff-prepare-buffer) . turn-on-solaire-mode)
+    (minibuffer-setup . solaire-mode-in-minibuffer)
+    :config
+    (solaire-global-mode +1)
+    (solaire-mode-swap-bg))
+
+  (doom-themes-org-config)
+  (doom-themes-neotree-config)
+  (customize-set-variable 'helm-ff-lynx-style-map t)
+
   )
 
-(setq org-confirm-babel-evaluate nil)
-
-(setq spaceline-org-clock-p t)
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
@@ -452,3 +474,46 @@ you should place your code here."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+(defun dotspacemacs/emacs-custom-settings ()
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("a8c210aa94c4eae642a34aaf1c5c0552855dfca2153fa6dd23f3031ce19453d4" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "11e57648ab04915568e558b77541d0e94e69d09c9c54c06075938b6abc0189d8" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
+ '(evil-want-Y-yank-to-eol nil)
+ '(package-selected-packages
+   (quote
+    (graphviz-dot-mode sedona-mode ox-gfm auctex-latexmk magit-popup git-commit with-editor espresso-theme eshell-z eshell-prompt-extras esh-help emmet-mode dracula-theme django-theme disaster darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme csv-mode company-web web-completion-data company-tern dash-functional tern company-statistics company-shell company-ghci company-ghc ghc haskell-mode company-cabal company-c-headers company-auctex company-anaconda company color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode cmm-mode cmake-mode clues-theme clang-format chruby cherry-blossom-theme busybee-theme bundler inf-ruby bubbleberry-theme birds-of-paradise-plus-theme biblio biblio-core badwolf-theme auto-yasnippet yasnippet auctex apropospriate-theme anti-zenburn-theme anaconda-mode pythonic ample-zen-theme ample-theme alect-themes afternoon-theme auto-complete imenu-list ibuffer-projectile slack emojify circe oauth2 websocket jedi-direx direx jedi company-jedi jedi-core python-environment epc ctable concurrent deferred ac-ispell realgud test-simple loc-changes load-relative textx-mode sc-mode org-journal nlinum kivy-mode zenburn-theme zen-and-art-theme yapfify yaml-mode xterm-color white-sand-theme web-mode web-beautify underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme stickyfunc-enhance srefactor spotify spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slim-mode shell-pop seti-theme scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reverse-theme rebecca-theme rbenv rake railscasts-theme pyvenv pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme plantuml-mode planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme orgit organic-green-theme org-ref pdf-tools key-chord ivy tablist org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme multi-term monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minitest minimal-theme material-theme markdown-toc markdown-mode majapahit-theme magit-gitflow magit-gh-pulls madhat2r-theme lush-theme livid-mode skewer-mode simple-httpd live-py-mode light-soap-theme json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc jbeans-theme jazz-theme multi xcscope parsebib gitignore-mode gh marshal logito pcache ht pos-tip flycheck magit ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint evil-unimpaired evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line avy highlight evil goto-chg undo-tree dash helm popup helm-core async ir-black-theme intero insert-shebang inkpot-theme indent-guide hydra hy-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation heroku-theme hemisu-theme helm-themes helm-swoop helm-spotify-plus helm-pydoc helm-projectile helm-mode-manager helm-make helm-hoogle helm-gtags helm-gitignore helm-flx helm-descbinds helm-css-scss helm-cscope helm-company helm-c-yasnippet helm-bibtex helm-ag hc-zenburn-theme haskell-snippets haml-mode gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio gnuplot github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags gandalf-theme fuzzy flycheck-pos-tip flycheck-haskell flx-ido flatui-theme flatland-theme fish-mode fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exotica-theme exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit)))
+ '(safe-local-variable-values
+   (quote
+    ((eval dap-register-debug-template "Debug sdc"
+           (list :type "python" :request "launch" :args "-v debug/join.hr compile" :name "Run Configuration"))
+     (eval dap-register-debug-template "Debug sdc"
+           (list :type "python" :request "launch" :args "-v examples/simple_broad.hr compile" :name "Run Configuration"))
+     (eval dap-register-debug-template "Debug sdc"
+           (list :type "python" :request "launch" :args "-v -I ../sedona-apps/squeezenet/sedona/ -I ../sedona-apps/libsedona/ ../sedona-apps/squeezenet/sedona/tests/layer_tb.hr compile" :name "Run Configuration"))
+     (eval dap-register-debug-template "Debug sdc"
+           (list :type "python" :request "launch" :args "" :name "Run Configuration"))
+     (eval dap-register-debug-template "Example Configuration"
+           (list :type "java" :request "launch" :args "" :name "Run Configuration"))
+     (eval defun add-debug-configuration nil
+           (dap-register-debug-template "Example Configuration"
+                                        (list :type "java" :request "launch" :args "" :name "Run Configuration")))
+     (javascript-backend . tern)
+     (javascript-backend . lsp))))
+ '(spaceline-all-the-icons-clock-always-visible nil)
+ '(spaceline-all-the-icons-separators-invert-direction 1)
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+))
