@@ -5,27 +5,24 @@ global:
   emacs
   peco
   the_silver_searcher
+  bat
+  exa
 
-main_gui:
-  jgmenu
-  tint2
+editor:
+  spacemacs
+  adobe-source-code-pro-fonts
+
+X11:
   i3
-  bumblebee-status
+  polybar
   lxrandr
   rofi
   onboard
 
-work:
+utils:
   xournal
 
-personal:
-  xournal
+media:
   spotify
   clementine
-
-fedora-packages-install:
-  adobe-source-code-pro-fonts
-  gdouros-symbola-fonts
-  fish
-  emacs
-  @C-Development-Tools-and-Libraries
+  vlc
