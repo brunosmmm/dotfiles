@@ -7,10 +7,12 @@ global:
   the_silver_searcher
   bat
   exa
+  brave
 
 editor:
   spacemacs
   adobe-source-code-pro-fonts
+  python-language-server
 
 X11:
   i3
