@@ -451,6 +451,9 @@ you should place your code here."
   (doom-themes-neotree-config)
   (customize-set-variable 'helm-ff-lynx-style-map t)
 
+  ;; transparency
+  (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
+  (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
   )
 
 
