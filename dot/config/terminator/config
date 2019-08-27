@@ -1,5 +1,7 @@
 [global_config]
   focus = mouse
+  handle_size = 0
+  inactive_color_offset = 0.508445945946
 [keybindings]
 [layouts]
   [[default]]
@@ -12,11 +14,13 @@
 [plugins]
 [profiles]
   [[default]]
+    background_color = "#202020"
     background_darkness = 0.8
     background_type = transparent
     cursor_color = "#aaaaaa"
-    font = DejaVuSansMono Nerd Font 11
+    font = DejaVuSansMono Nerd Font Mono 11
     foreground_color = "#ffffff"
+    rewrap_on_resize = False
     scrollback_infinite = True
     scrollbar_position = hidden
     show_titlebar = False

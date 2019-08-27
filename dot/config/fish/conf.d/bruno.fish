@@ -13,9 +13,9 @@ set -gx PATH /home/bruno/.local/bin:/home/bruno/.gem/ruby/2.6.0/bin:/home/bruno/
 # editor
 set -x EDITOR (which vim)
 
-# function fish_user_key_bindings
-#  bind \cr 'peco_select_history (commandline -b)'
-# end
-
+# aliases
 alias ls exa
 alias cat bat
+alias ssh "env TERM=xterm-256color ssh"
+
+set -U FZF_LEGACY_KEYBINDINGS 0
