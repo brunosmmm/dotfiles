@@ -27,4 +27,5 @@ utils:
 media:
   spotify
   clementine
+  playerctl
   vlc
