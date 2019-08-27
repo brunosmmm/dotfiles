@@ -3,6 +3,8 @@
 import sys
 import dbus
 import argparse
+import datetime
+import math
 
 
 parser = argparse.ArgumentParser()
@@ -74,6 +76,15 @@ try:
     metadata = spotify_properties.Get(
         "org.mpris.MediaPlayer2.Player", "Metadata"
     )
+    _length = int(metadata["mpris:length"]) / 60000000
+    _sec, _min = math.modf(_length)
+    length = "{:02d}:{:02d}".format(int(_min), int(_sec * 60))
+    _position = int(
+        spotify_properties.Get("org.mpris.MediaPlayer2.Player", "Position")
+    )
+
+    _sec, _min = math.modf(_position)
+    position = "{:02d}:{:02d}".format(int(_min), int(_sec * 60))
     status = spotify_properties.Get(
         "org.mpris.MediaPlayer2.Player", "PlaybackStatus"
     )
@@ -118,7 +129,15 @@ try:
             artist = label_with_font.format(font=font, label=artist)
             song = label_with_font.format(font=font, label=song)
 
-        print(output.format(artist=artist, song=song, play_pause=play_pause))
+        print(
+            output.format(
+                artist=artist,
+                song=song,
+                play_pause=play_pause,
+                length=length,
+                position=position,
+            )
+        )
 
 except Exception as e:
     if isinstance(e, dbus.exceptions.DBusException):
