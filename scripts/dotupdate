@@ -13,8 +13,8 @@ if __name__ == "__main__":
     ins = GitDotfileInspector("../dot", "/home/bruno")
     changes = ins.determine_changes()
 
-    print("{} files have changed".format("No" if changes else len(changes)))
-    if changes:
+    print("{} files have changed".format("No" if not changes else len(changes)))
+    if not changes:
         exit(0)
     choice = input("Update repository?")
     if choice == "y":
