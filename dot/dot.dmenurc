@@ -3,7 +3,7 @@
 #
 
 ## define the font for dmenu to be used
-DMENU_FN="Noto-10.5"
+DMENU_FN="Iosevka-10:style=Bold"
 
 ## background colour for unselected menu-items
 DMENU_NB="#252525"
@@ -21,4 +21,4 @@ DMENU_SF="#252525"
 TERMINAL_CMD="terminal -e"
 
 ## export our variables
-DMENU_OPTIONS="-fn $DMENU_FN -nb $DMENU_NB -nf $DMENU_NF -sf $DMENU_SF -sb $DMENU_SB"
+DMENU_OPTIONS="-fn $DMENU_FN -nb $DMENU_NB -nf $DMENU_NF -sf $DMENU_SF -sb $DMENU_SB -o 0.8"
