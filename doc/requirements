@@ -20,6 +20,7 @@ X11:
   lxrandr
   rofi
   onboard
+  betterlockscreen
 
 utils:
   xournal
