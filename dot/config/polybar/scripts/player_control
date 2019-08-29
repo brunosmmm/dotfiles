@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+"""Control player currently shown in bar."""
+
+from subprocess import check_call
+from argparse import ArgumentParser
+
+if __name__ == "__main__":
+
+    parser = ArgumentParser()
+    parser.add_argument("cmd")
+    args = parser.parse_args()
+
+    try:
+        with open("/tmp/playerctl", "r") as ctlfile:
+            player_name = ctlfile.read().strip()
+    except OSError:
+        exit(1)
+
+    try:
+        check_call(["playerctl", "-p", player_name, args.cmd])
+    except Exception:
+        exit(1)
