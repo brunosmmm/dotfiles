@@ -8,10 +8,10 @@ from gi.repository import Playerctl
 from argparse import ArgumentParser
 import pickle
 
-PLAY_GLYPH = u"\uf04b"
-PAUSE_GLYPH = u"\uf04c"
+PLAY_GLYPH = u"\ue9af"
+PAUSE_GLYPH = u"\ue9a4"
 
-PLAYER_GLYPHS = {"spotify": u"\uf1bc", "default": u"\uf001"}
+PLAYER_GLYPHS = {"spotify": u"\uf1bc", "default": u"\ue99e"}
 
 
 def format_time(time):
