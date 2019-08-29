@@ -18,7 +18,7 @@ DMENU_SB="#FFB300"
 DMENU_SF="#252525"
 
 ## command for the terminal application to be used:
-TERMINAL_CMD="terminal -e"
+TERMINAL_CMD="alacritty -e"
 
 PROMPT="run:"
 
