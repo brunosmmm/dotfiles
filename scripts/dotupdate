@@ -3,14 +3,22 @@
 
 import os
 import shutil
+from argparse import ArgumentParser
 
 from dotutils.git import GitDotfileInspector
 
 if __name__ == "__main__":
 
+    parser = ArgumentParser()
+    parser.add_argument("p", help="dot files storage path")
+    parser.add_argument(
+        "--home", help="home directory path", default=os.environ["HOME"]
+    )
+    args = parser.parse_args()
+
     print("Checking for changes...")
 
-    ins = GitDotfileInspector("../dot", "/home/bruno")
+    ins = GitDotfileInspector(args.p, args.home)
     changes = ins.determine_changes()
 
     print("{} files have changed".format("No" if not changes else len(changes)))
