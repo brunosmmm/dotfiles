@@ -19,6 +19,12 @@ if __name__ == "__main__":
         "--quiet", help="quietly update", action="store_true", default=False
     )
     group.add_argument("--diff", help="get diff for a monitored file")
+    group.add_argument(
+        "--interactive",
+        help="update interactively",
+        default=False,
+        action="store_true",
+    )
     args = parser.parse_args()
 
     ins = GitDotfileInspector(args.p, args.home)
@@ -36,8 +42,9 @@ if __name__ == "__main__":
     if args.quiet is False:
         print("Checking for changes...")
         print(
-            "{} files have changed:".format(
-                "No" if not changes else len(changes)
+            "{} files have changed{}".format(
+                "No" if not changes else len(changes),
+                "" if not changes else ":",
             )
         )
     if not changes:
@@ -45,9 +52,32 @@ if __name__ == "__main__":
     else:
         if args.quiet is False:
             for changed in changes:
-                print(changed)
+                if args.interactive is True:
+                    choice = input(f"{changed} [update (u)/skip (s)/diff (d)]?")
+                    if choice == "u":
+                        shutil.copyfile(
+                            changes[changed], changed, follow_symlinks=False
+                        )
+                    elif choice == "d":
+                        print(ins.diff_file(changed))
+                        choice = input(f"{changed} [update (u)/skip (s)]?")
+                        if choice == "u":
+                            shutil.copyfile(
+                                changes[changed], changed, follow_symlinks=False
+                            )
+                        else:
+                            print("skipped")
+                    else:
+                        print("skipped")
+                else:
+                    print(changed)
+
+    if args.interactive is True:
+        # update already occurred
+        exit(0)
+
     if args.quiet is False:
-        choice = input("Update repository?")
+        choice = input("Update repository? [y/n]")
     else:
         choice = "y"
 
