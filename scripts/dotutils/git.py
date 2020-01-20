@@ -3,7 +3,7 @@
 import os
 import subprocess
 from . import exceptions
-from .misc import files_differ
+from .misc import files_differ, git_diff
 
 
 class GitDotfileInspector:
@@ -76,3 +76,14 @@ class GitDotfileInspector:
                 changed_files[repo_file] = user_file
 
         return changed_files
+
+    def diff_file(self, fname):
+        """Get diff."""
+        file_map = self.inspect()
+        if fname not in file_map:
+            raise RuntimeError(f"file is not monitored: '{fname}'")
+
+        if files_differ(fname, file_map[fname]):
+            return git_diff(file_map[fname], fname)
+        else:
+            return ""

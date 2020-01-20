@@ -14,18 +14,27 @@ if __name__ == "__main__":
     parser.add_argument(
         "--home", help="home directory path", default=os.environ["HOME"]
     )
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
         "--quiet", help="quietly update", action="store_true", default=False
     )
+    group.add_argument("--diff", help="get diff for a monitored file")
     args = parser.parse_args()
 
-    if args.quiet is False:
-        print("Checking for changes...")
-
     ins = GitDotfileInspector(args.p, args.home)
+
+    if args.diff is not None:
+        try:
+            print(ins.diff_file(args.diff))
+        except RuntimeError as ex:
+            print(f"ERROR: {ex}")
+            exit(1)
+        exit(0)
+
     changes = ins.determine_changes()
 
     if args.quiet is False:
+        print("Checking for changes...")
         print(
             "{} files have changed:".format(
                 "No" if not changes else len(changes)
