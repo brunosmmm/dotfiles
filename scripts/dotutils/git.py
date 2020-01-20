@@ -82,6 +82,8 @@ class GitDotfileInspector:
         file_map = self.inspect()
         if not fname.startswith(self._dot_path):
             dot_fname = os.path.join(self._dot_path, fname)
+        else:
+            dot_fname = fname
 
         if dot_fname not in file_map:
             # try to do a reverse-lookup
