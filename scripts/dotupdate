@@ -14,17 +14,34 @@ if __name__ == "__main__":
     parser.add_argument(
         "--home", help="home directory path", default=os.environ["HOME"]
     )
+    parser.add_argument(
+        "--quiet", help="quietly update", action="store_true", default=False
+    )
     args = parser.parse_args()
 
-    print("Checking for changes...")
+    if args.quiet is False:
+        print("Checking for changes...")
 
     ins = GitDotfileInspector(args.p, args.home)
     changes = ins.determine_changes()
 
-    print("{} files have changed".format("No" if not changes else len(changes)))
+    if args.quiet is False:
+        print(
+            "{} files have changed:".format(
+                "No" if not changes else len(changes)
+            )
+        )
     if not changes:
         exit(0)
-    choice = input("Update repository?")
+    else:
+        if args.quiet is False:
+            for changed in changes:
+                print(changed)
+    if args.quiet is False:
+        choice = input("Update repository?")
+    else:
+        choice = "y"
+
     if choice == "y":
         # update
         for repo_file, user_file in changes.items():
