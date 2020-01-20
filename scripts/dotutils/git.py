@@ -80,10 +80,27 @@ class GitDotfileInspector:
     def diff_file(self, fname):
         """Get diff."""
         file_map = self.inspect()
-        if fname not in file_map:
-            raise RuntimeError(f"file is not monitored: '{fname}'")
+        if not fname.startswith(self._dot_path):
+            dot_fname = os.path.join(self._dot_path, fname)
 
-        if files_differ(fname, file_map[fname]):
-            return git_diff(file_map[fname], fname)
+        if dot_fname not in file_map:
+            # try to do a reverse-lookup
+            found = False
+            for repo_file, user_file in file_map.items():
+                if user_file == fname:
+                    dot_fname = repo_file
+                    found = True
+                    break
+        else:
+            found = True
+
+        if found is False:
+            if not os.path.exists(fname):
+                raise RuntimeError(f"file does not exist: '{fname}'")
+            else:
+                raise RuntimeError(f"file is not monitored: '{fname}'")
+
+        if files_differ(dot_fname, file_map[dot_fname]):
+            return git_diff(file_map[dot_fname], dot_fname)
         else:
             return ""
