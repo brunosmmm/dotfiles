@@ -30,52 +30,41 @@ values."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(graphviz
-     php
+   '(
      helm
      emacs-lisp
      yaml
-     ruby
      shell-scripts
-     haskell
      html
-     csv
      javascript
-     auto-completion
+     (auto-completion :variables auto-completion-use-company-box t)
      git
      github
      (python :variables python-test-runner 'nose python-backend 'lsp python-formatter 'black python-format-on-save t)
      (c-c++ :variables c-c++-backend 'lsp-ccls c-c++-adopt-subprojects t)
      latex
      bibtex
-     plantuml
-     themes-megapack
      markdown
      (org :variables org-enable-github-support t org-projectile-file "/home/bruno/work/org/GlobalTODO.org" org-enable-org-journal-support t)
      gtags
      cscope
-     semantic
+     ;; semantic
      syntax-checking
      spell-checking
      spotify
      (shell :variables shell-default-term-shell "/usr/bin/fish")
-     ;; journal
-     bruno_other
-     slack
      ibuffer
-     imenu-list
      docker
      systemd
      lsp
      (plantuml :variables plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar" org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
-     ;; ycmd
      (debug :variables debug-additional-debuggers '("ipdb" "pdb" "trepan3k"))
      neotree
      dap
      rust
      imenu-list
      (cmake :variables cmake-enable-cmake-ide-support t)
-     (scala :variables scala-backend 'scala-metals)
+     ;;(scala :variables scala-backend 'scala-metals)
    )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -90,6 +79,7 @@ values."
                                       bitbake
                                       solaire-mode
                                       doom-themes
+                                      (textx-mode :location (recipe :fetcher github :repo "novakboskov/textx-mode"))
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -337,10 +327,10 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
   ;; FIXME TEMPORARY
-  (add-to-list 'configuration-layer-elpa-archives '("melpa-stable" . "stable.melpa.org/packages/"))
-  (add-to-list 'package-pinned-packages '(spaceline . "melpa-stable"))
-  (add-to-list 'package-pinned-packages '(spaceline-all-the-icons . "melpa-stable"))
-  (add-to-list 'package-pinned-packages '(all-the-icons . "melpa-stable"))
+  ;; (add-to-list 'configuration-layer-elpa-archives '("melpa-stable" . "stable.melpa.org/packages/"))
+  ;; (add-to-list 'package-pinned-packages '(spaceline . "melpa-stable"))
+  ;; (add-to-list 'package-pinned-packages '(spaceline-all-the-icons . "melpa-stable"))
+  ;; (add-to-list 'package-pinned-packages '(all-the-icons . "melpa-stable"))
   )
 
 (defun dotspacemacs/user-config ()
@@ -457,6 +447,20 @@ you should place your code here."
   (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
   (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
   (setq lsp-file-watch-threshold 2000)
+  (setq company-lsp-cache-candidates 'auto)
+
+  ;; decrease awful slowness for lsp-mode
+  (setq lsp-ui-doc-enable nil)
+
+  ;; merge from old custom layer
+  (setq shell-file-name "/bin/bash")
+  (setq explicit-shell-file-name "/bin/bash")
+  (setq org-journal-dir "/home/bruno/work/org/journal")
+
+  ;; enable fill ruler
+  (spacemacs/add-to-hooks 'spacemacs/toggle-fill-column-indicator-on
+                          '(python-mode-hook c-mode-hook)
+                          '(c-mode-hook))
   )
 
 
