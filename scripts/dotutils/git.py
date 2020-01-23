@@ -103,6 +103,6 @@ class GitDotfileInspector:
                 raise RuntimeError(f"file is not monitored: '{fname}'")
 
         if files_differ(dot_fname, file_map[dot_fname]):
-            return git_diff(file_map[dot_fname], dot_fname)
+            return git_diff(dot_fname, file_map[dot_fname])
         else:
             return ""
