@@ -64,7 +64,7 @@ values."
      rust
      imenu-list
      (cmake :variables cmake-enable-cmake-ide-support t)
-     ;;(scala :variables scala-backend 'scala-metals)
+     (scala :variables scala-backend 'scala-metals)
    )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -84,7 +84,7 @@ values."
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '()
+   dotspacemacs-excluded-packages '(ensime)
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
    ;; `used-only' installs only explicitly used packages and uninstall any
@@ -285,7 +285,7 @@ values."
    ;;                       text-mode
    ;;   :size-limit-kb 1000)
    ;; (default nil)
-   dotspacemacs-line-numbers nil
+   dotspacemacs-line-numbers t
    ;; Code folding method. Possible values are `evil' and `origami'.
    ;; (default 'evil)
    dotspacemacs-folding-method 'evil
@@ -331,6 +331,9 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; (add-to-list 'package-pinned-packages '(spaceline . "melpa-stable"))
   ;; (add-to-list 'package-pinned-packages '(spaceline-all-the-icons . "melpa-stable"))
   ;; (add-to-list 'package-pinned-packages '(all-the-icons . "melpa-stable"))
+
+  ;; replace default separator due to weird rendering
+  (setq dotspacemacs-mode-line-theme '(spacemacs :separator slant :separator-scale 1.5))
   )
 
 (defun dotspacemacs/user-config ()
@@ -340,11 +343,6 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  ;;multiple-cursors mode
-  (require 'multiple-cursors)
-  (global-set-key (kbd "C->") 'mc/mark-next-like-this)
-  (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-  (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
 
   ;;c++: do not indent inside namespaces
   (c-set-offset 'innamespace 0)
@@ -360,23 +358,8 @@ you should place your code here."
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
   (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
 
-  ;;disable smooth scrolling
-  ;;(setq dotspacemacs-smooth-scrolling nil)
-  ;;(remove-hook 'spaceline-pre-hook 'spacemacs//prepare-diminish)
-  ;; (setq flycheck-highlighting-mode 'lines)
-
-  ;;turn off spell checking
-  ;;(setq-default dotspacemacs-configuration-layers
-  ;;              '((spell-checking :variables spell-checking-enable-by-default nil)))
-
   ;;enable global ws-butler
   (ws-butler-global-mode 1)
-
-  ;; get rid of menu bar
-  (menu-bar-mode -1)
-
-  ;; global linum mode
-  (add-hook 'prog-mode-hook #'display-line-numbers-mode)
 
   (require 'helm-bookmark)
 
@@ -384,7 +367,6 @@ you should place your code here."
   (setq mouse-autoselect-window t)
 
   ;; imenu
-
   (setq imenu-list-auto-resize nil)
   (setq imenu-list-size 0.3)
 
@@ -458,9 +440,8 @@ you should place your code here."
   (spacemacs/add-to-hooks 'spacemacs/toggle-fill-column-indicator-on
                           '(python-mode-hook c-mode-hook)
                           '(c-mode-hook))
+
   )
-
-
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
 (custom-set-variables
