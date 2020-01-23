@@ -56,7 +56,7 @@ values."
      ibuffer
      docker
      systemd
-     lsp
+     (lsp :variables lsp-ui-doc-enable nil)
      (plantuml :variables plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar" org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
      (debug :variables debug-additional-debuggers '("ipdb" "pdb" "trepan3k"))
      neotree
@@ -448,9 +448,6 @@ you should place your code here."
   (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
   (setq lsp-file-watch-threshold 2000)
   (setq company-lsp-cache-candidates 'auto)
-
-  ;; decrease awful slowness for lsp-mode
-  (setq lsp-ui-doc-enable nil)
 
   ;; merge from old custom layer
   (setq shell-file-name "/bin/bash")
