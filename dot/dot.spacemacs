@@ -40,7 +40,7 @@ values."
      (auto-completion :variables auto-completion-use-company-box t)
      git
      github
-     (python :variables python-test-runner 'nose python-backend 'lsp python-formatter 'black python-format-on-save t)
+     (python :variables python-test-runner 'pytest python-backend 'lsp python-formatter 'black python-format-on-save t)
      (c-c++ :variables c-c++-backend 'lsp-ccls c-c++-adopt-subprojects t)
      latex
      bibtex
@@ -73,9 +73,7 @@ values."
    dotspacemacs-additional-packages '(
                                       ;; (sedona-mode :location
                                       ;;              (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
-                                      all-the-icons
                                       all-the-icons-dired
-                                      spaceline-all-the-icons
                                       bitbake
                                       solaire-mode
                                       doom-themes
@@ -326,14 +324,8 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
-  ;; FIXME TEMPORARY
-  ;; (add-to-list 'configuration-layer-elpa-archives '("melpa-stable" . "stable.melpa.org/packages/"))
-  ;; (add-to-list 'package-pinned-packages '(spaceline . "melpa-stable"))
-  ;; (add-to-list 'package-pinned-packages '(spaceline-all-the-icons . "melpa-stable"))
-  ;; (add-to-list 'package-pinned-packages '(all-the-icons . "melpa-stable"))
-
   ;; replace default separator due to weird rendering
-  (setq dotspacemacs-mode-line-theme '(spacemacs :separator slant :separator-scale 1.5))
+  (setq dotspacemacs-mode-line-theme '(all-the-icons :separator slant :separator-scale 1.5))
   )
 
 (defun dotspacemacs/user-config ()
@@ -399,17 +391,31 @@ you should place your code here."
 
   (setq org-confirm-babel-evaluate nil)
 
-  (setq spaceline-org-clock-p t)
-  (setq spaceline-minor-modes-p nil)
   (setq neo-theme 'icons)
   (setq powerline-default-separator 'slant)
-  (use-package spaceline-all-the-icons
-    :after spaceline
-    :config
-    (spaceline-all-the-icons-theme)
-    (spaceline-all-the-icons--setup-anzu)
-    (spaceline-all-the-icons--setup-git-ahead)
-    (spaceline-all-the-icons--setup-neotree))
+  (setq powerline-default-separator-dir (quote (right . left)))
+  (spaceline-toggle-all-the-icons-hud-off)
+  (spaceline-toggle-all-the-icons-buffer-size-off)
+  (spaceline-toggle-all-the-icons-time-off)
+  ;;(setq spaceline-all-the-icons-clock-always-visible t)
+  (setq spaceline-all-the-icons-separators-invert-direction 1)
+
+  (spaceline-define-segment all-the-icons-org-clock-current-task
+    "An `all-the-icons' segment to display the current org-clock task."
+    (let ((face `(:height ,(spaceline-all-the-icons--height 0.9) :inherit)))
+      (propertize
+       (concat
+        (propertize (all-the-icons-faicon "clock-o" :v-adjust 0.1)
+                    'face `(:height ,(spaceline-all-the-icons--height 1.1) :family ,(all-the-icons-faicon-family) :inherit))
+        " "
+        (propertize (truncate-string-to-width (org-clock-get-clock-string) 20 nil nil "…")
+                    'face face
+                    'display '(raise 0.1)))
+       'help-echo "Go to task"
+       'mouse-face (spaceline-all-the-icons--highlight)
+       'local-map (make-mode-line-mouse-map 'mouse-1 #'org-clock-goto)))
+    :when (and active
+               (bound-and-true-p org-clock-current-task)))
 
   (require 'dap-lldb)
 
@@ -438,9 +444,8 @@ you should place your code here."
 
   ;; enable fill ruler
   (spacemacs/add-to-hooks 'spacemacs/toggle-fill-column-indicator-on
-                          '(python-mode-hook c-mode-hook)
-                          '(c-mode-hook))
-
+                          '(python-mode-hook c-mode-hook))
+  (setq paradox-github-token "cdf9e73e11dbedf4a310fb5f4a185430455ad08e")
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
@@ -497,8 +502,6 @@ This function is called at the very end of Spacemacs initialization."
                                         (list :type "java" :request "launch" :args "" :name "Run Configuration")))
      (javascript-backend . tern)
      (javascript-backend . lsp))))
- '(spaceline-all-the-icons-clock-always-visible nil)
- '(spaceline-all-the-icons-separators-invert-direction 1)
  '(verilog-auto-newline nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
