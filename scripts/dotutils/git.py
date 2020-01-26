@@ -64,7 +64,8 @@ class GitDotfileInspector:
 
         return file_map
 
-    def determine_changes(self):
+    @property
+    def changes(self):
         """Determine which files have changed."""
         file_map = self.inspect()
 
@@ -77,7 +78,21 @@ class GitDotfileInspector:
 
         return changed_files
 
-    def diff_file(self, fname):
+    @property
+    def reverse_changes(self):
+        """Determine which files have changed."""
+        file_map = self.inspect()
+
+        changed_files = {}
+        for repo_file, user_file in file_map.items():
+            if not os.path.exists(user_file):
+                continue
+            if files_differ(user_file, repo_file):
+                changed_files[user_file] = repo_file
+
+        return changed_files
+
+    def diff_file(self, fname, reverse=False):
         """Get diff."""
         file_map = self.inspect()
         if not fname.startswith(self._dot_path):
@@ -103,6 +118,8 @@ class GitDotfileInspector:
                 raise RuntimeError(f"file is not monitored: '{fname}'")
 
         if files_differ(dot_fname, file_map[dot_fname]):
+            if reverse:
+                return git_diff(file_map[dot_fname], dot_fname)
             return git_diff(dot_fname, file_map[dot_fname])
         else:
             return ""

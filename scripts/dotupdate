@@ -13,24 +13,31 @@ def _fatal(err_msg, code=1):
     exit(code)
 
 
-def _show_diff(inspector, _exit=True):
+def _show_diff(inspector, reverse=False, _exit=True):
     try:
-        print(inspector.diff_file(args.diff))
+        print(inspector.diff_file(args.diff, reverse=reverse))
         if _exit:
             exit(0)
     except RuntimeError as ex:
         _fatal(ex)
 
 
-def _update_all(changes):
+def _update_file(user_file, repo_file, reverse=False):
+    if reverse:
+        shutil.copyfile(repo_file, user_file, follow_symlinks=False)
+    else:
+        shutil.copyfile(user_file, repo_file, follow_symlinks=False)
+
+
+def _update_all(changes, reverse=False):
     for repo_file, user_file in changes.items():
         if os.path.islink(repo_file):
             # leave symlinks alone
             continue
-        shutil.copyfile(user_file, repo_file, follow_symlinks=False)
+        _update_file(user_file, repo_file, reverse)
 
 
-def _update(args):
+def _update(args, direction="repo"):
     ins = GitDotfileInspector(args.p, args.home)
 
     if args.diff is not None:
@@ -39,7 +46,10 @@ def _update(args):
     if args.quiet is False:
         print("Checking for changes...")
 
-    changes = ins.determine_changes()
+    if direction not in ("repo", "home"):
+        raise ValueError("direction must be either home or repo")
+    changes = ins.changes if direction == "repo" else ins.reverse_changes
+    reverse = direction == "home"
 
     if args.quiet is False:
         print(
@@ -57,16 +67,12 @@ def _update(args):
             if args.interactive is True:
                 choice = input(f"{changed} [update (u)/skip (s)/diff (d)]?")
                 if choice == "u":
-                    shutil.copyfile(
-                        changes[changed], changed, follow_symlinks=False
-                    )
+                    _update_file(changes[changed], changed)
                 elif choice == "d":
-                    print(ins.diff_file(changed))
+                    print(ins.diff_file(changed, reverse=reverse))
                     choice = input(f"{changed} [update (u)/skip (s)]?")
                     if choice == "u":
-                        shutil.copyfile(
-                            changes[changed], changed, follow_symlinks=False
-                        )
+                        _update_file(changes[changed], changed)
                     else:
                         print("skipped")
                 else:
@@ -112,13 +118,23 @@ if __name__ == "__main__":
         default=False,
         action="store_true",
     )
+    group = install_parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--quiet", help="quietly update", action="store_true", default=False
+    )
+    group.add_argument("--diff", help="get diff for a monitored file")
+    group.add_argument(
+        "--interactive",
+        help="update interactively",
+        default=False,
+        action="store_true",
+    )
     args = parser.parse_args()
 
     if args.cmd is None:
         parser.print_usage()
         exit(0)
     elif args.cmd == "update":
-        _update(args)
+        _update(args, direction="repo")
     elif args.cmd == "install":
-        print("Not implemented")
-        exit(1)
+        _update(args, direction="home")
