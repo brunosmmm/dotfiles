@@ -7,26 +7,8 @@ from argparse import ArgumentParser
 
 from dotutils.git import GitDotfileInspector
 
-if __name__ == "__main__":
 
-    parser = ArgumentParser()
-    parser.add_argument("p", help="dot files storage path")
-    parser.add_argument(
-        "--home", help="home directory path", default=os.environ["HOME"]
-    )
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
-        "--quiet", help="quietly update", action="store_true", default=False
-    )
-    group.add_argument("--diff", help="get diff for a monitored file")
-    group.add_argument(
-        "--interactive",
-        help="update interactively",
-        default=False,
-        action="store_true",
-    )
-    args = parser.parse_args()
-
+def _update(args):
     ins = GitDotfileInspector(args.p, args.home)
 
     if args.diff is not None:
@@ -90,3 +72,40 @@ if __name__ == "__main__":
             shutil.copyfile(user_file, repo_file, follow_symlinks=False)
     else:
         print("Aborted")
+
+
+if __name__ == "__main__":
+
+    parser = ArgumentParser()
+    parser.add_argument("p", help="dot files storage path")
+    subparsers = parser.add_subparsers(help="sub-commands", dest="cmd")
+    update_parser = subparsers.add_parser(
+        "update", help="update dotfiles from home directory"
+    )
+    install_parser = subparsers.add_parser(
+        "install", help="install dotfiles to home directory"
+    )
+    parser.add_argument(
+        "--home", help="home directory path", default=os.environ["HOME"]
+    )
+    group = update_parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--quiet", help="quietly update", action="store_true", default=False
+    )
+    group.add_argument("--diff", help="get diff for a monitored file")
+    group.add_argument(
+        "--interactive",
+        help="update interactively",
+        default=False,
+        action="store_true",
+    )
+    args = parser.parse_args()
+
+    if args.cmd is None:
+        parser.print_usage()
+        exit(0)
+    elif args.cmd == "update":
+        _update(args)
+    elif args.cmd == "install":
+        print("Not implemented")
+        exit(1)
