@@ -8,21 +8,40 @@ from argparse import ArgumentParser
 from dotutils.git import GitDotfileInspector
 
 
+def _fatal(err_msg, code=1):
+    print(f"FATAL: {err_msg}")
+    exit(code)
+
+
+def _show_diff(inspector, _exit=True):
+    try:
+        print(inspector.diff_file(args.diff))
+        if _exit:
+            exit(0)
+    except RuntimeError as ex:
+        _fatal(ex)
+
+
+def _update_all(changes):
+    for repo_file, user_file in changes.items():
+        if os.path.islink(repo_file):
+            # leave symlinks alone
+            continue
+        shutil.copyfile(user_file, repo_file, follow_symlinks=False)
+
+
 def _update(args):
     ins = GitDotfileInspector(args.p, args.home)
 
     if args.diff is not None:
-        try:
-            print(ins.diff_file(args.diff))
-        except RuntimeError as ex:
-            print(f"ERROR: {ex}")
-            exit(1)
-        exit(0)
+        _show_diff(ins)
+
+    if args.quiet is False:
+        print("Checking for changes...")
 
     changes = ins.determine_changes()
 
     if args.quiet is False:
-        print("Checking for changes...")
         print(
             "{} files have changed{}".format(
                 "No" if not changes else len(changes),
@@ -30,46 +49,40 @@ def _update(args):
             )
         )
     if not changes:
+        # done
         exit(0)
-    else:
-        if args.quiet is False:
-            for changed in changes:
-                if args.interactive is True:
-                    choice = input(f"{changed} [update (u)/skip (s)/diff (d)]?")
+
+    if args.quiet is False:
+        for changed in changes:
+            if args.interactive is True:
+                choice = input(f"{changed} [update (u)/skip (s)/diff (d)]?")
+                if choice == "u":
+                    shutil.copyfile(
+                        changes[changed], changed, follow_symlinks=False
+                    )
+                elif choice == "d":
+                    print(ins.diff_file(changed))
+                    choice = input(f"{changed} [update (u)/skip (s)]?")
                     if choice == "u":
                         shutil.copyfile(
                             changes[changed], changed, follow_symlinks=False
                         )
-                    elif choice == "d":
-                        print(ins.diff_file(changed))
-                        choice = input(f"{changed} [update (u)/skip (s)]?")
-                        if choice == "u":
-                            shutil.copyfile(
-                                changes[changed], changed, follow_symlinks=False
-                            )
-                        else:
-                            print("skipped")
                     else:
                         print("skipped")
                 else:
-                    print(changed)
+                    print("skipped")
+            else:
+                print(changed)
 
     if args.interactive is True:
         # update already occurred
         exit(0)
 
-    if args.quiet is False:
-        choice = input("Update repository? [y/n]")
-    else:
-        choice = "y"
+    choice = input("Update repository? [y/n]") if args.quiet is False else "y"
 
     if choice == "y":
         # update
-        for repo_file, user_file in changes.items():
-            if os.path.islink(repo_file):
-                # leave symlinks alone
-                continue
-            shutil.copyfile(user_file, repo_file, follow_symlinks=False)
+        _update_all(changes)
     else:
         print("Aborted")
 
