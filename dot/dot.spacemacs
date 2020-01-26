@@ -445,7 +445,6 @@ you should place your code here."
   ;; enable fill ruler
   (spacemacs/add-to-hooks 'spacemacs/toggle-fill-column-indicator-on
                           '(python-mode-hook c-mode-hook))
-  (setq paradox-github-token "cdf9e73e11dbedf4a310fb5f4a185430455ad08e")
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
