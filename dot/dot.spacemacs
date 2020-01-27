@@ -375,7 +375,7 @@ you should place your code here."
             (org-projectile-todo-files)))
 
   ;; auto-format python
-  (setq blacken-line-length 80)
+  (setq blacken-line-length 79) ;; PEP-8 annoying value
 
   (setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
   (with-eval-after-load 'org
