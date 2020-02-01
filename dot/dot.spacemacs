@@ -78,6 +78,7 @@ values."
                                       solaire-mode
                                       doom-themes
                                       (textx-mode :location (recipe :fetcher github :repo "novakboskov/textx-mode"))
+                                      magit-todos
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
