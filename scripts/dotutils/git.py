@@ -122,4 +122,4 @@ class GitDotfileInspector:
                 return git_diff(file_map[dot_fname], dot_fname)
             return git_diff(dot_fname, file_map[dot_fname])
         else:
-            return ""
+            return None

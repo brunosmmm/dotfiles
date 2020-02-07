@@ -13,9 +13,9 @@ def _fatal(err_msg, code=1):
     exit(code)
 
 
-def _show_diff(inspector, reverse=False, _exit=True):
+def _show_diff(inspector, thefile, reverse=False, _exit=True):
     try:
-        print(inspector.diff_file(args.diff, reverse=reverse))
+        print(inspector.diff_file(thefile, reverse=reverse))
         if _exit:
             exit(0)
     except RuntimeError as ex:
@@ -39,10 +39,6 @@ def _update_all(changes, reverse=False):
 
 def _update(args, direction="repo"):
     ins = GitDotfileInspector(args.p, args.home)
-
-    if args.diff is not None:
-        _show_diff(ins)
-
     if args.quiet is False:
         print("Checking for changes...")
 
@@ -93,11 +89,30 @@ def _update(args, direction="repo"):
         print("Aborted")
 
 
+def _inspect(args):
+    ins = GitDotfileInspector(args.p, args.home)
+    try:
+        diff = ins.diff_file(args.fname)
+    except:
+        raise
+
+    if args.diff:
+        print(diff)
+    else:
+        if diff is None:
+            print("No changes")
+        else:
+            print("File has changed")
+
+
 if __name__ == "__main__":
 
     parser = ArgumentParser()
     parser.add_argument("p", help="dot files storage path")
     subparsers = parser.add_subparsers(help="sub-commands", dest="cmd")
+    inspect_parser = subparsers.add_parser("inspect", help="inspect files")
+    inspect_parser.add_argument("fname", help="file to inspect")
+    inspect_parser.add_argument("--diff", action="store_true", help="show diff")
     update_parser = subparsers.add_parser(
         "update", help="update dotfiles from home directory"
     )
@@ -111,7 +126,6 @@ if __name__ == "__main__":
     group.add_argument(
         "--quiet", help="quietly update", action="store_true", default=False
     )
-    group.add_argument("--diff", help="get diff for a monitored file")
     group.add_argument(
         "--interactive",
         help="update interactively",
@@ -138,3 +152,5 @@ if __name__ == "__main__":
         _update(args, direction="repo")
     elif args.cmd == "install":
         _update(args, direction="home")
+    elif args.cmd == "inspect":
+        _inspect(args)
