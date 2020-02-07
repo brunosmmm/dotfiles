@@ -65,6 +65,7 @@ values."
      imenu-list
      (cmake :variables cmake-enable-cmake-ide-support t)
      (scala :variables scala-backend 'scala-metals)
+     deft
    )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -79,6 +80,8 @@ values."
                                       doom-themes
                                       (textx-mode :location (recipe :fetcher github :repo "novakboskov/textx-mode"))
                                       magit-todos
+                                      focus
+                                      (lsp-focus :location (recipe :fetcher github :repo "emacs-lsp/lsp-focus"))
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -441,11 +444,20 @@ you should place your code here."
   ;; merge from old custom layer
   (setq shell-file-name "/bin/bash")
   (setq explicit-shell-file-name "/bin/bash")
-  (setq org-journal-dir "/home/bruno/work/org/journal")
 
   ;; enable fill ruler
   (spacemacs/add-to-hooks 'spacemacs/toggle-fill-column-indicator-on
-                          '(python-mode-hook c-mode-hook))
+                          '(python-mode-hook)
+                          '(c-mode-hook)
+                          '(scala-mode-hook))
+
+  ;; lsp-focus
+  (add-hook 'focus-mode-hook #'lsp-focus-mode)
+  ;; add mnemonic keybinding
+  (spacemacs/set-leader-keys "bf" 'focus-mode)
+
+  ;; deft directory
+  (setq deft-directory "~/work/org")
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
