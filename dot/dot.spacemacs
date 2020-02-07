@@ -458,6 +458,7 @@ you should place your code here."
 
   ;; deft directory
   (setq deft-directory "~/work/org")
+  (setq deft-recursive t)
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
