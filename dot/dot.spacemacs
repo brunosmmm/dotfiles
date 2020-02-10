@@ -447,9 +447,7 @@ you should place your code here."
 
   ;; enable fill ruler
   (spacemacs/add-to-hooks 'spacemacs/toggle-fill-column-indicator-on
-                          '(python-mode-hook)
-                          '(c-mode-hook)
-                          '(scala-mode-hook))
+                          '(python-mode-hook c-mode-hook scala-mode-hook))
 
   ;; lsp-focus
   (add-hook 'focus-mode-hook #'lsp-focus-mode)
