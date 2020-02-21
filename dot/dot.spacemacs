@@ -50,13 +50,13 @@ values."
      cscope
      ;; semantic
      syntax-checking
-     spell-checking
+     (spell-checking :variables spell-checking-enable-by-default nil)
      spotify
      (shell :variables shell-default-term-shell "/usr/bin/fish")
      ibuffer
      docker
      systemd
-     (lsp :variables lsp-ui-doc-enable nil)
+     (lsp :variables lsp-ui-doc-enable nil lsp-signature-auto-activate nil)
      (plantuml :variables plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar" org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
      (debug :variables debug-additional-debuggers '("ipdb" "pdb" "trepan3k"))
      neotree
@@ -490,6 +490,7 @@ you should place your code here."
            :user "soutomaiormunizmo.b@husky.neu.edu")
    :subscribed-channels '((general slackbot)))
 
+  (setq read-process-output-max (* 1024 1024))
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
