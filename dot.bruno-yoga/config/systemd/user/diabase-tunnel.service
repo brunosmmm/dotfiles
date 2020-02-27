@@ -1,0 +1,7 @@
+[Unit]
+Description=ssh tunnel to diabase machine
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ssh -N -f -S /tmp/diabase-sock -L 9999:10.75.15.172:22 bmorais@gateway.coe.neu.edu
+ExecStop=/usr/bin/ssh -S /tmp/diabase-sock -O exit bmorais@localhost
