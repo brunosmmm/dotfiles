@@ -397,7 +397,11 @@ you should place your code here."
     (setq org-journal-enable-agenda-integration t)
     (setq org-journal-dir (concat dotspacemacs-org-directory "/journal"))
     (setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
-    (org-babel-do-load-languages 'org-babel-load-languages '((plantuml . t)))
+    (org-babel-do-load-languages 'org-babel-load-languages
+                                 '(
+                                   (plantuml . t)
+                                   (shell . t)
+                                   ))
     )
 
   ;; put project TODOs in org file
