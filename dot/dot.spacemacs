@@ -31,7 +31,9 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
-     helm
+     (ivy :variables ivy-enable-advanced-buffer-information t)
+     ;; helm
+     ess
      emacs-lisp
      yaml
      shell-scripts
@@ -76,6 +78,7 @@ values."
                                       ;; (sedona-mode :location
                                       ;;              (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
                                       all-the-icons-dired
+                                      all-the-icons-ivy-rich
                                       bitbake
                                       solaire-mode
                                       doom-themes
@@ -352,6 +355,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
   ;; replace default separator due to weird rendering
   (setq dotspacemacs-mode-line-theme '(all-the-icons :separator slant :separator-scale 1.5))
+  ;; (setq dotspacemacs-mode-line-theme '(doom))
   )
 
 (defun dotspacemacs/user-config ()
@@ -381,8 +385,6 @@ you should place your code here."
   ;;enable global ws-butler
   (ws-butler-global-mode 1)
 
-  ;; (require 'helm-bookmark)
-
   ;; focus follows mouse
   (setq mouse-autoselect-window t)
 
@@ -401,6 +403,7 @@ you should place your code here."
                                  '(
                                    (plantuml . t)
                                    (shell . t)
+                                   (R . t)
                                    ))
     )
 
@@ -427,28 +430,38 @@ you should place your code here."
   (setq neo-theme 'icons)
   (setq powerline-default-separator 'slant)
   (setq powerline-default-separator-dir (quote (right . left)))
-  (spaceline-toggle-all-the-icons-hud-off)
-  (spaceline-toggle-all-the-icons-buffer-size-off)
-  (spaceline-toggle-all-the-icons-time-off)
-  ;;(setq spaceline-all-the-icons-clock-always-visible t)
-  (setq spaceline-all-the-icons-separators-invert-direction 1)
 
-  (spaceline-define-segment all-the-icons-org-clock-current-task
-    "An `all-the-icons' segment to display the current org-clock task."
-    (let ((face `(:height ,(spaceline-all-the-icons--height 0.9) :inherit)))
-      (propertize
-       (concat
-        (propertize (all-the-icons-faicon "clock-o" :v-adjust 0.1)
-                    'face `(:height ,(spaceline-all-the-icons--height 1.1) :family ,(all-the-icons-faicon-family) :inherit))
-        " "
-        (propertize (truncate-string-to-width (org-clock-get-clock-string) 20 nil nil "…")
-                    'face face
-                    'display '(raise 0.1)))
-       'help-echo "Go to task"
-       'mouse-face (spaceline-all-the-icons--highlight)
-       'local-map (make-mode-line-mouse-map 'mouse-1 #'org-clock-goto)))
-    :when (and active
-               (bound-and-true-p org-clock-current-task)))
+  ;; configuration for spaceline-all-the-icons
+  (if (eq (spacemacs/get-mode-line-theme-name) 'all-the-icons)
+      (progn
+        (spaceline-toggle-all-the-icons-hud-off)
+        (spaceline-toggle-all-the-icons-buffer-size-off)
+        (spaceline-toggle-all-the-icons-time-off)
+        (setq spaceline-all-the-icons-separators-invert-direction 1)
+
+        (spaceline-define-segment all-the-icons-org-clock-current-task
+          "An `all-the-icons' segment to display the current org-clock task."
+          (let ((face `(:height ,(spaceline-all-the-icons--height 0.9) :inherit)))
+            (propertize
+             (concat
+              (propertize (all-the-icons-faicon "clock-o" :v-adjust 0.1)
+                          'face `(:height ,(spaceline-all-the-icons--height 1.1) :family ,(all-the-icons-faicon-family) :inherit))
+              " "
+              (propertize (truncate-string-to-width (org-clock-get-clock-string) 20 nil nil "…")
+                          'face face
+                          'display '(raise 0.1)))
+             'help-echo "Go to task"
+             'mouse-face (spaceline-all-the-icons--highlight)
+             'local-map (make-mode-line-mouse-map 'mouse-1 #'org-clock-goto)))
+          :when (and active
+                     (bound-and-true-p org-clock-current-task)))))
+
+  ;; configuration for doom-modeline
+  (if (eq (spacemacs/get-mode-line-theme-name) 'doom)
+      (progn
+        (setq doom-modeline-checker-simple-format nil)
+        (setq doom-modeline-buffer-encoding nil)
+        ))
 
   (require 'dap-lldb)
 
@@ -495,6 +508,11 @@ you should place your code here."
    :subscribed-channels '((general slackbot)))
 
   (setq read-process-output-max (* 1024 1024))
+
+  ;; icons in dired mode
+  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+
+  (all-the-icons-ivy-rich-mode 1)
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
