@@ -1,0 +1,18 @@
+{
+    "postactions": [
+        {
+            "action": "install",
+            "file_ext": "service",
+            "shell_cmd": "systemctl --user daemon-reload",
+            "name": "update_systemctl",
+            "description": "update systemctl units in user directory"
+        },
+        {
+            "action": "update",
+            "file_ext": ".*",
+            "shell_cmd": "git add ${repo_file}",
+            "name": "auto_add",
+            "description": "automatically stage updated files"
+        }
+    ]
+}

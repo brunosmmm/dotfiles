@@ -2,107 +2,41 @@
 """Update dotfiles from current user's home directory."""
 
 import os
-import shutil
+import json
+from pathlib import Path
 from argparse import ArgumentParser
 
-from dotutils.git import GitDotfileInspector
+from dotutils.actions import update, inspect
+from dotutils.postactions import (
+    POST_ACTION_MGR,
+    PostActionMgr,
+    make_shell_post_action,
+)
 
 
-def _fatal(err_msg, code=1):
-    print(f"FATAL: {err_msg}")
-    exit(code)
+def add_postactions(postactions: dict):
+    """Add postactions from configuration."""
+    postactions = postactions.get("postactions")
+    if postactions is None:
+        print("WARNING: invalid postaction configuration")
+        return
 
+    for postaction in postactions:
+        action = postaction.get("action")
+        file_ext = postaction.get("file_ext")
+        shell_cmd = postaction.get("shell_cmd")
+        name = postaction.get("name")
+        descr = postaction.get("description")
 
-def _show_diff(inspector, thefile, reverse=False, _exit=True):
-    try:
-        print(inspector.diff_file(thefile, reverse=reverse))
-        if _exit:
-            exit(0)
-    except RuntimeError as ex:
-        _fatal(ex)
-
-
-def _update_file(user_file, repo_file, reverse=False):
-    if reverse:
-        shutil.copyfile(repo_file, user_file, follow_symlinks=False)
-    else:
-        shutil.copyfile(user_file, repo_file, follow_symlinks=False)
-
-
-def _update_all(changes, reverse=False):
-    for repo_file, user_file in changes.items():
-        if os.path.islink(repo_file):
-            # leave symlinks alone
-            continue
-        _update_file(user_file, repo_file, reverse)
-
-
-def _update(args, direction="repo"):
-    ins = GitDotfileInspector(args.p, args.home)
-    if args.quiet is False:
-        print("Checking for changes...")
-
-    if direction not in ("repo", "home"):
-        raise ValueError("direction must be either home or repo")
-    changes = ins.changes if direction == "repo" else ins.reverse_changes
-    reverse = direction == "home"
-
-    if args.quiet is False:
-        print(
-            "{} files have changed{}".format(
-                "No" if not changes else len(changes),
-                "" if not changes else ":",
-            )
+        if action is None or file_ext is None or shell_cmd is None:
+            print("WARNING: invalid postaction configuration")
+            return
+        shell_postaction = make_shell_post_action(
+            action, file_ext, shell_cmd, name, descr
         )
-    if not changes:
-        # done
-        exit(0)
-
-    if args.quiet is False:
-        for changed in changes:
-            if args.interactive is True:
-                choice = input(f"{changed} [update (u)/skip (s)/diff (d)]?")
-                if choice == "u":
-                    _update_file(changes[changed], changed)
-                elif choice == "d":
-                    print(ins.diff_file(changed, reverse=reverse))
-                    choice = input(f"{changed} [update (u)/skip (s)]?")
-                    if choice == "u":
-                        _update_file(changes[changed], changed)
-                    else:
-                        print("skipped")
-                else:
-                    print("skipped")
-            else:
-                print(changed)
-
-    if args.interactive is True:
-        # update already occurred
-        exit(0)
-
-    choice = input("Update repository? [y/n]") if args.quiet is False else "y"
-
-    if choice == "y":
-        # update
-        _update_all(changes)
-    else:
-        print("Aborted")
-
-
-def _inspect(args):
-    ins = GitDotfileInspector(args.p, args.home)
-    try:
-        diff = ins.diff_file(args.fname)
-    except:
-        raise
-
-    if args.diff:
-        print(diff)
-    else:
-        if diff is None:
-            print("No changes")
-        else:
-            print("File has changed")
+        POST_ACTION_MGR.register_postaction(
+            PostActionMgr.POSTACTION_UPDATE, shell_postaction
+        )
 
 
 if __name__ == "__main__":
@@ -112,7 +46,9 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(help="sub-commands", dest="cmd")
     inspect_parser = subparsers.add_parser("inspect", help="inspect files")
     inspect_parser.add_argument("fname", help="file to inspect")
-    inspect_parser.add_argument("--diff", action="store_true", help="show diff")
+    inspect_parser.add_argument(
+        "--diff", action="store_true", help="show diff"
+    )
     update_parser = subparsers.add_parser(
         "update", help="update dotfiles from home directory"
     )
@@ -145,12 +81,39 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    dotupdate_path = Path(__file__).parent.absolute()
+    config_path = os.path.join(dotupdate_path, "config")
+    postaction_config = os.path.join(config_path, "postactions.json")
+
+    postactions = None
+    try:
+        with open(postaction_config, "r") as postaction_data:
+            postactions = json.load(postaction_data)
+    except json.JSONDecodeError:
+        print("WARNING: malformed json, cannot load postaction configuration")
+    except OSError:
+        print("WARNING: could not open postaction configuration file")
+
+    if postactions is not None:
+        add_postactions(postactions)
+
     if args.cmd is None:
         parser.print_usage()
         exit(0)
     elif args.cmd == "update":
-        _update(args, direction="repo")
+        update(
+            args.p, args.home, args.interactive, args.quiet, direction="repo"
+        )
     elif args.cmd == "install":
-        _update(args, direction="home")
+        update(
+            args.p, args.home, args.interactive, args.quiet, direction="home"
+        )
     elif args.cmd == "inspect":
-        _inspect(args)
+        ret = inspect(args.p, args.home, args.fname, args.diff)
+        if isinstance(ret, bool):
+            if ret:
+                print("File has been modified")
+            else:
+                print("File has not been modified")
+        else:
+            print(ret)
