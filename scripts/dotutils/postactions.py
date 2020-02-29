@@ -181,6 +181,8 @@ class PostActionMgr:
             if post_action.will_act(user_file, reverse):
                 ret = post_action.act(user_file, repo_file, reverse)
                 postaction_results.append(ret)
+            # did not act
+            postaction_results.append(None)
         return postaction_results
 
     def _postaction_update_all(self) -> List[bool]:
