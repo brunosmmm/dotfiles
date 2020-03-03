@@ -457,12 +457,14 @@ you should place your code here."
                          (:name "Critical / Overdue"
                                 :tag "critical"
                                 :deadline past
-                                :priority "A")
-                         ;; requires attention
+                                :priority "A"
+                                :transformer(--> it (concat " " (all-the-icons-faicon "exclamation-triangle" :v-adjust 0.1 :height 1.0) it))
+                                )
+                         ;; requires attention -- limit to 30 days, but priority >= B overrides it
                          (:name "Requires attention"
                                 :tag "important"
-                                :deadline future
-                                :priority "B")
+                                :and (:deadline future :deadline (before ,(org-read-date nil nil "+30")))
+                                :priority>= "B")
                          ;; discard anything else, will show up in the todo-list
                          (:discard (:anything t))
                          ))
@@ -479,7 +481,7 @@ you should place your code here."
                         '(
                           ;; week preview
                           (:name "Happening soon"
-                                 :deadline future
+                                 :and (:deadline future :deadline (before ,(org-read-date nil nil "+7")))
                                  :scheduled (before ,(org-read-date nil nil "+7")))
                           ;; discard anything else, will show up in the todo-list
                           (:discard (:anything t))
@@ -546,8 +548,27 @@ you should place your code here."
     (org-ql-view "Overview: Longterm")
     )
 
+  (defun bmorais/show-ql-unsched ()
+    (interactive)
+    (org-ql-view "Unscheduled tasks"))
+
+  (defun bmorais/match-tag-icon (tag)
+    "Match tag regular expression to a fontawesome icon"
+    (setq tag-to-icon '(("travel" . "plane")))
+    )
+
+  (defun bmorais/transform-agenda-line (line)
+    "Parse line with regular expression and transform."
+    )
+
   ;; overwrite agenda keybindings
   (spacemacs/set-leader-keys "aoa" 'bmorais/show-agenda)
+  ;; set some more agenda-related bindings
+  (spacemacs/set-leader-keys "aoqs" 'bmorais/show-ql-soon)
+  (spacemacs/set-leader-keys "aoqt" 'bmorais/show-ql-today)
+  (spacemacs/set-leader-keys "aoql" 'bmorais/show-ql-longterm)
+  (spacemacs/set-leader-keys "aoqS" 'org-ql-search)
+  (spacemacs/set-leader-keys "aoqu" 'bmorais/show-ql-unsched)
 
   (setq bmorais/agenda-files
         `(,(concat dotspacemacs-org-directory "personal/agenda.org")
@@ -567,7 +588,14 @@ you should place your code here."
                          (ts :from today)  ;; dont show past due items
                          (planning 7))     ;; show for next 7 days
                 :sort (priority date)
-                :title "Happenning soon")
+                :title "Happenning soon"
+                :super-groups
+                (
+                 (:name "Tasks scheduled to happen soon"
+                        :anything t
+                        :transformer(--> it
+                                         (concat " " (all-the-icons-faicon "clock-o" :v-adjust 0.1) it)))
+                 ))
                 ("Overview: Longterm"
                  :buffers-files org-agenda-files
                  :query (and
@@ -610,15 +638,25 @@ you should place your code here."
                          :tag "critical"
                          :deadline past
                          :priority "A")))
+                ("Unscheduled tasks"
+                 :buffers-files org-agenda-files
+                 :query (and (not (done)) (not (ts-active)) (todo) (not (todo "INACTIVE")))
+                 :sort (priority)
+                 :title "Unscheduled tasks"
+                 :super-groups
+                 (
+                  (:name "Work-related"
+                         :tag ("neu" "eece4534" "esl")
+                         :file-path "neu-agenda"
+                         )
+                  (:name "Personal and others"
+                         :file-path "agenda"
+                         )
+                  )
+                 )
                 )
               )
         ))
-
-  (with-eval-after-load 'orq-ql
-    (spacemacs/set-leader-keys "aoqs" 'bmorais/show-ql-soon)
-    (spacemacs/set-leader-keys "aoqt" 'bmorais/show-ql-today)
-    (spacemacs/set-leader-keys "aoql" 'bmorais/show-ql-longterm)
-    )
 
   ;; Configure org-agenda
   (with-eval-after-load 'org-agenda
@@ -629,7 +667,7 @@ you should place your code here."
     (setq org-agenda-block-separator nil)
     (setq org-agenda-compact-blocks t)
     (setq org-refile-targets
-          '((bmorais/agenda-files :maxlevel . 3)))
+          '((bmorais/agenda-files :maxlevel . 2)))
     (add-to-list 'org-agenda-custom-commands `,bmorais/org-agenda-todo-view)
     (org-super-agenda-mode 1)
     (mapcar '(lambda (file)
