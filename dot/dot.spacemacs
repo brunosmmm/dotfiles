@@ -549,8 +549,14 @@ you should place your code here."
     )
 
   (defun bmorais/show-ql-unsched ()
+    "Show unscheduled tasks"
     (interactive)
     (org-ql-view "Unscheduled tasks"))
+
+  (defun bmorais/show-ql-misc ()
+    "Show miscellaneous tasks"
+    (interactive)
+    (org-ql-view "Oneshot tasks"))
 
   (defun bmorais/match-tag-icon (tag)
     "Match tag regular expression to a fontawesome icon"
@@ -569,11 +575,13 @@ you should place your code here."
   (spacemacs/set-leader-keys "aoql" 'bmorais/show-ql-longterm)
   (spacemacs/set-leader-keys "aoqS" 'org-ql-search)
   (spacemacs/set-leader-keys "aoqu" 'bmorais/show-ql-unsched)
+  (spacemacs/set-leader-keys "aoqm" 'bmorais/show-ql-misc)
 
   (setq bmorais/agenda-files
         `(,(concat dotspacemacs-org-directory "personal/agenda.org")
           ,(concat dotspacemacs-org-directory "personal/ideas.org")
           ,(concat dotspacemacs-org-directory "neu/neu-agenda.org")
+          ,(concat dotspacemacs-org-directory "neu/esl/4534clock2020.org")
           ,(concat dotspacemacs-org-directory "oneshot.org")
           ,(concat dotspacemacs-org-directory "inbox.org")))
 
@@ -647,12 +655,15 @@ you should place your code here."
                  (
                   (:name "Work-related"
                          :tag ("neu" "eece4534" "esl")
-                         :file-path "neu-agenda"
-                         )
+                         :file-path "neu-agenda")
                   (:name "Personal and others"
-                         :file-path "agenda"
-                         )
-                  )
+                         :file-path "agenda")))
+                ("Oneshot tasks"
+                 :buffers-files org-agenda-files
+                 :query (and (not (done)) (tags "oneshot"))
+                 :sort (priority)
+                 :title "Oneshot and miscellaneous tasks"
+                 :super-groups ((:name "Isolated, oneshot, misc" :anything t))
                  )
                 )
               )
@@ -688,8 +699,8 @@ you should place your code here."
   (setq org-confirm-babel-evaluate nil)
 
   (setq neo-theme 'icons)
-  (setq powerline-default-separator 'slant)
-  (setq powerline-default-separator-dir (quote (right . left)))
+  (setq powerline-default-separator 'arrow)
+  ;; (setq powerline-default-separator-dir (quote (right . left)))
 
   ;; configuration for spaceline-all-the-icons
   (if (eq (spacemacs/get-mode-line-theme-name) 'all-the-icons)
@@ -816,15 +827,19 @@ This function is called at the very end of Spacemacs initialization."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("a8c210aa94c4eae642a34aaf1c5c0552855dfca2153fa6dd23f3031ce19453d4" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "11e57648ab04915568e558b77541d0e94e69d09c9c54c06075938b6abc0189d8" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default))
+   (quote
+    ("a8c210aa94c4eae642a34aaf1c5c0552855dfca2153fa6dd23f3031ce19453d4" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "11e57648ab04915568e558b77541d0e94e69d09c9c54c06075938b6abc0189d8" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
  '(evil-want-Y-yank-to-eol nil)
  '(nil nil t)
  '(org-agenda-files
-   '("~/work/org/inbox.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/neu/neu-agenda.org" "~/work/org/personal/agenda.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/neu/esl/4534clock2020.org"))
+   (quote
+    ("~/work/org/oneshot.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/inbox.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/neu/neu-agenda.org" "~/work/org/personal/agenda.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/neu/esl/4534clock2020.org")))
  '(package-selected-packages
-   '(graphviz-dot-mode sedona-mode ox-gfm auctex-latexmk magit-popup git-commit with-editor espresso-theme eshell-z eshell-prompt-extras esh-help emmet-mode dracula-theme django-theme disaster darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme csv-mode company-web web-completion-data company-tern dash-functional tern company-statistics company-shell company-ghci company-ghc ghc haskell-mode company-cabal company-c-headers company-auctex company-anaconda company color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode cmm-mode cmake-mode clues-theme clang-format chruby cherry-blossom-theme busybee-theme bundler inf-ruby bubbleberry-theme birds-of-paradise-plus-theme biblio biblio-core badwolf-theme auto-yasnippet yasnippet auctex apropospriate-theme anti-zenburn-theme anaconda-mode pythonic ample-zen-theme ample-theme alect-themes afternoon-theme auto-complete imenu-list ibuffer-projectile slack emojify circe oauth2 websocket jedi-direx direx jedi company-jedi jedi-core python-environment epc ctable concurrent deferred ac-ispell realgud test-simple loc-changes load-relative textx-mode sc-mode org-journal nlinum kivy-mode zenburn-theme zen-and-art-theme yapfify yaml-mode xterm-color white-sand-theme web-mode web-beautify underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme stickyfunc-enhance srefactor spotify spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slim-mode shell-pop seti-theme scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reverse-theme rebecca-theme rbenv rake railscasts-theme pyvenv pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme plantuml-mode planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme orgit organic-green-theme org-ref pdf-tools key-chord ivy tablist org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme multi-term monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minitest minimal-theme material-theme markdown-toc markdown-mode majapahit-theme magit-gitflow magit-gh-pulls madhat2r-theme lush-theme livid-mode skewer-mode simple-httpd live-py-mode light-soap-theme json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc jbeans-theme jazz-theme multi xcscope parsebib gitignore-mode gh marshal logito pcache ht pos-tip flycheck magit ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint evil-unimpaired evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line avy highlight evil goto-chg undo-tree dash helm popup helm-core async ir-black-theme intero insert-shebang inkpot-theme indent-guide hydra hy-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation heroku-theme hemisu-theme helm-themes helm-spotify-plus helm-pydoc helm-projectile helm-mode-manager helm-make helm-hoogle helm-gtags helm-gitignore helm-flx helm-descbinds helm-css-scss helm-cscope helm-company helm-c-yasnippet helm-bibtex helm-ag hc-zenburn-theme haskell-snippets haml-mode gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio gnuplot github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags gandalf-theme fuzzy flycheck-pos-tip flycheck-haskell flx-ido flatui-theme flatland-theme fish-mode fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exotica-theme exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit))
+   (quote
+    (graphviz-dot-mode sedona-mode ox-gfm auctex-latexmk magit-popup git-commit with-editor espresso-theme eshell-z eshell-prompt-extras esh-help emmet-mode dracula-theme django-theme disaster darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme csv-mode company-web web-completion-data company-tern dash-functional tern company-statistics company-shell company-ghci company-ghc ghc haskell-mode company-cabal company-c-headers company-auctex company-anaconda company color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode cmm-mode cmake-mode clues-theme clang-format chruby cherry-blossom-theme busybee-theme bundler inf-ruby bubbleberry-theme birds-of-paradise-plus-theme biblio biblio-core badwolf-theme auto-yasnippet yasnippet auctex apropospriate-theme anti-zenburn-theme anaconda-mode pythonic ample-zen-theme ample-theme alect-themes afternoon-theme auto-complete imenu-list ibuffer-projectile slack emojify circe oauth2 websocket jedi-direx direx jedi company-jedi jedi-core python-environment epc ctable concurrent deferred ac-ispell realgud test-simple loc-changes load-relative textx-mode sc-mode org-journal nlinum kivy-mode zenburn-theme zen-and-art-theme yapfify yaml-mode xterm-color white-sand-theme web-mode web-beautify underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme stickyfunc-enhance srefactor spotify spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slim-mode shell-pop seti-theme scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reverse-theme rebecca-theme rbenv rake railscasts-theme pyvenv pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme plantuml-mode planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme orgit organic-green-theme org-ref pdf-tools key-chord ivy tablist org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme multi-term monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minitest minimal-theme material-theme markdown-toc markdown-mode majapahit-theme magit-gitflow magit-gh-pulls madhat2r-theme lush-theme livid-mode skewer-mode simple-httpd live-py-mode light-soap-theme json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc jbeans-theme jazz-theme multi xcscope parsebib gitignore-mode gh marshal logito pcache ht pos-tip flycheck magit ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint evil-unimpaired evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line avy highlight evil goto-chg undo-tree dash helm popup helm-core async ir-black-theme intero insert-shebang inkpot-theme indent-guide hydra hy-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation heroku-theme hemisu-theme helm-themes helm-spotify-plus helm-pydoc helm-projectile helm-mode-manager helm-make helm-hoogle helm-gtags helm-gitignore helm-flx helm-descbinds helm-css-scss helm-cscope helm-company helm-c-yasnippet helm-bibtex helm-ag hc-zenburn-theme haskell-snippets haml-mode gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio gnuplot github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags gandalf-theme fuzzy flycheck-pos-tip flycheck-haskell flx-ido flatui-theme flatland-theme fish-mode fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exotica-theme exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit)))
  '(safe-local-variable-values
-   '((eval dap-register-debug-template "Debug sdc"
+   (quote
+    ((eval dap-register-debug-template "Debug sdc"
            (list :type "python" :request "launch" :args "-v debug/join.hr compile" :name "Run Configuration"))
      (eval dap-register-debug-template "Debug sdc"
            (list :type "python" :request "launch" :args "-v examples/simple_broad.hr compile" :name "Run Configuration"))
@@ -838,7 +853,7 @@ This function is called at the very end of Spacemacs initialization."
            (dap-register-debug-template "Example Configuration"
                                         (list :type "java" :request "launch" :args "" :name "Run Configuration")))
      (javascript-backend . tern)
-     (javascript-backend . lsp)))
+     (javascript-backend . lsp))))
  '(verilog-auto-newline nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
