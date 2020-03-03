@@ -448,6 +448,7 @@ you should place your code here."
                       (org-super-agenda-groups
                        '(
                          ;; time grid
+                         (:discard (:todo "REFILE"))
                          (:name "Today"
                                 :time-grid t
                                 :date today
@@ -522,10 +523,28 @@ you should place your code here."
                        ))
              nil))))
 
-  (defun bmorais/show-agenda()
+  (defun bmorais/show-agenda ()
     "Show agenda as filtered by org-super-agenda as default."
     (interactive)
     (org-agenda nil "g"))
+
+  (defun bmorais/show-ql-soon ()
+    "Show org-ql-view."
+    (interactive)
+    (org-ql-view "Overview: Happening soon")
+    )
+
+  (defun bmorais/show-ql-today ()
+    "Show orq-ql-view for today."
+    (interactive)
+    (org-ql-view "Today's Agenda")
+    )
+
+  (defun bmorais/show-ql-longterm ()
+    "Show orq-ql-view for longterm."
+    (interactive)
+    (org-ql-view "Overview: Longterm")
+    )
 
   ;; overwrite agenda keybindings
   (spacemacs/set-leader-keys "aoa" 'bmorais/show-agenda)
@@ -549,26 +568,57 @@ you should place your code here."
                          (planning 7))     ;; show for next 7 days
                 :sort (priority date)
                 :title "Happenning soon")
+                ("Overview: Longterm"
+                 :buffers-files org-agenda-files
+                 :query (and
+                         (not (done))      ;; not done yet
+                         (ts-active :from today :to ,(org-read-date nil nil 365))
+                         )   ;; show for next 7 days
+                 :sort (priority date)
+                 :title "Longterm view"
+                 :super-groups
+                 (
+                  (:name "Work-related tasks and appointments"
+                         :and (:file-path "neu-agenda"
+                                          :todo "TODO")
+                         :tag ("esl" "eece4534" "neu"))
+                  (:name "Work-related important dates & events"
+                         :file-path "neu-agenda")
+                  (:name "Personal tasks and appointments"
+                         :and (:file-path "agenda"
+                                          :todo "TODO"))
+                  (:name "Personal important dates & events"
+                         :file-path "agenda")
+                  (:discard (:anything t))
+                  ))
                 ("Today's Agenda"
                  :buffers-files org-agenda-files
                  :query (and
                          (or
                          (ts-active :on today)
-                         (deadline auto)
+                         (deadline :to today)
                          (scheduled :to today))
                          (not (done)))
                  :sort (priority)
                  :title "Today's Agenda"
-                 :super-groups (
-                                (:name "Critical / Overdue"
-                                       :tag "critical"
-                                       :deadline past
-                                       :priority "A")
-                                )
-                 )
+                 :super-groups
+                 (
+                  (:name "Due today"
+                         :scheduled today
+                         :deadline today)
+                  (:name "Critical / Overdue"
+                         :tag "critical"
+                         :deadline past
+                         :priority "A")))
                 )
               )
         ))
+
+  (with-eval-after-load 'orq-ql
+    (spacemacs/set-leader-keys "aoqs" 'bmorais/show-ql-soon)
+    (spacemacs/set-leader-keys "aoqt" 'bmorais/show-ql-today)
+    (spacemacs/set-leader-keys "aoql" 'bmorais/show-ql-longterm)
+    )
 
   ;; Configure org-agenda
   (with-eval-after-load 'org-agenda
