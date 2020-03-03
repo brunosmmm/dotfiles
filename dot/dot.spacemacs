@@ -527,6 +527,11 @@ you should place your code here."
     "Parse line with regular expression and transform."
     )
 
+  (defun bmorais/show-ql-clocks ()
+    "Show project clocks."
+    (interactive) (org-ql-view "Project clocks")
+    )
+
   ;; overwrite agenda keybindings
   (spacemacs/set-leader-keys "aoa" 'bmorais/show-agenda)
   ;; set some more agenda-related bindings
@@ -536,6 +541,7 @@ you should place your code here."
   (spacemacs/set-leader-keys "aoqS" 'org-ql-search)
   (spacemacs/set-leader-keys "aoqu" 'bmorais/show-ql-unsched)
   (spacemacs/set-leader-keys "aoqm" 'bmorais/show-ql-misc)
+  (spacemacs/set-leader-keys "aoqc" 'bmorais/show-ql-clocks)
 
   (setq bmorais/agenda-files
         `(,(concat dotspacemacs-org-directory "personal/agenda.org")
@@ -591,7 +597,10 @@ you should place your code here."
        ;; Oneshot: miscellaneous stuff, one off items
        ("Oneshot tasks" :buffers-files org-agenda-files
         :query (and (not (done)) (tags "oneshot")) :sort (priority) :title "Oneshot and miscellaneous tasks"
-        :super-groups ((:name "Isolated, oneshot, misc" :anything t)))))
+        :super-groups ((:name "Isolated, oneshot, misc" :anything t)))
+       ;; Project clocks
+       ("Project clocks" :buffers-files (lambda () (directory-files-recursively dotspacemacs-org-directory "^[^#]+\.org$"))
+        :query (property "project-clock") :title "Project clocks")))
     )
 
   ;; Configure org-agenda
