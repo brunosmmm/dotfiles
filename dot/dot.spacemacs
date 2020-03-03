@@ -86,7 +86,6 @@ values."
                                       magit-todos
                                       focus
                                       (lsp-focus :location (recipe :fetcher github :repo "emacs-lsp/lsp-focus"))
-                                      ;; zetteldeft
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -366,7 +365,7 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
-  (setq dotspacemacs-org-directory "~/work/org")
+  (setq dotspacemacs-org-directory "~/work/org/")
 
   ;;c++: do not indent inside namespaces
   (c-set-offset 'innamespace 0)
@@ -396,24 +395,197 @@ you should place your code here."
   (with-eval-after-load 'org
     (setq org-directory dotspacemacs-org-directory)
     ;; (setq org-agenda-files '("/home/bruno/work/org"))
+    (require 'org-protocol)
     (setq org-journal-enable-agenda-integration t)
-    (setq org-journal-dir (concat dotspacemacs-org-directory "/journal"))
+    (setq org-journal-dir (concat dotspacemacs-org-directory "journal"))
     (setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
     (org-babel-do-load-languages 'org-babel-load-languages
                                  '(
                                    (plantuml . t)
                                    (shell . t)
                                    (R . t)
+                                   (python . t)
                                    ))
+    ;; org capture templates stolen from https://blog.jethro.dev/posts/capturing_inbox/ and modified
+    (setq org-capture-templates
+          `(("i" "inbox" entry (file ,(concat dotspacemacs-org-directory "inbox.org"))
+             "* REFILE %? :uncategorized:")
+            ("e" "email" entry (file+headline ,(concat dotspacemacs-org-directory "emails.org") "Emails")
+             "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
+            ("l" "link" entry (file ,(concat dotspacemacs-org-directory "inbox.org"))
+             "* TODO %(org-cliplink-capture)" :immediate-finish t)
+            ("c" "org-protocol-capture" entry (file ,(concat dotspacemacs-org-directory "inbox.org"))
+             "* TODO [[%:link][%:description]]\n\n %i" :immediate-finish t)
+            ("a" "actionable" entry (file ,(concat dotspacemacs-org-directory "oneshot.org"))
+             "* TODO %? :actionable:oneshot:")
+            ("A" "actionable (immediate)" entry (file ,(concat dotspacemacs-org-directory "oneshot.org"))
+             "* NEXT %? :actionable:oneshot:" :immediate-finisht t :clock-in t)
+            ))
+    )
+  ;; (setq spacemacs-theme-org-agenda-height nil
+  ;;       org-agenda-skip-scheduled-if-done t
+  ;;       org-agenda-skip-deadline-if-done t
+  ;;       org-agenda-include-deadlines t
+  ;;       org-agenda-include-diary t
+  ;;       org-agenda-block-separator nil
+  ;;       org-agenda-compact-blocks t
+  ;;       org-agenda-start-with-log-mode t)
+
+  (defun bmorais/get-timestamp-plus-days (daycount)
+    (let* (sec minute hour day mont year dow dst utcoff) (decode-time))
+    (format "%d-%02d-%02d" year month)
     )
 
-  ;; put project TODOs in org file
+  ;; custom agenda view with my categories
   (with-eval-after-load 'org-agenda
-     (require 'org-projectile)
-     (mapcar '(lambda (file)
-                (when (file-exists-p file)
-                  (push file org-agenda-files)))
-             (org-projectile-todo-files)))
+    (setq bmorais/org-agenda-todo-view
+          `("g" "Agenda"
+            (
+             ;; day view
+             (agenda ""
+                     ((org-agenda-span 'day)
+                      (org-deadline-warning-days 365)
+                      (org-super-agenda-groups
+                       '(
+                         ;; time grid
+                         (:name "Today"
+                                :time-grid t
+                                :date today
+                                :scheduled today)
+                         ;; critical items
+                         (:name "Critical / Overdue"
+                                :tag "critical"
+                                :deadline past
+                                :priority "A")
+                         ;; requires attention
+                         (:name "Requires attention"
+                                :tag "important"
+                                :deadline future
+                                :priority "B")
+                         ;; discard anything else, will show up in the todo-list
+                         (:discard (:anything t))
+                         ))
+                      ))
+             ;; critical item section always visible
+             (alltodo ""
+                      ((org-agenda-overriding-header "")
+                       (org-agenda-span 1)
+                       (org-agenda-compact-blocks t)
+                       (org-agenda-entry-types '(:deadline :scheduled :timestamp))
+                       (org-deadline-warning-days 7)
+                       (org-agenda-todo-keyword-format "")
+                       (org-super-agenda-groups
+                        '(
+                          ;; week preview
+                          (:name "Happening soon"
+                                 :deadline future
+                                 :scheduled (before ,(org-read-date nil nil "+7")))
+                          ;; discard anything else, will show up in the todo-list
+                          (:discard (:anything t))
+                          ))
+                       ))
+             ;; to-do list, events etc
+             (alltodo ""
+                      ((org-agenda-overriding-header "")
+                       ;; manually specify files that will be inspected
+                       (org-agenda-files bmorais/agenda-files)
+                       (org-super-agenda-groups
+                        '(
+                          ;; items to be refiled from inbox
+                          (:name "Inbox -> refile"
+                                 :file-path "inbox")
+                          ;; items that are currently in progress
+                          (:name "In progress"
+                                 :todo "NEXT")
+                          ;; WORK tasks
+                          (:name "Work tasks"
+                                 :file-path "neu-agenda"
+                                 :tag ("neu" "eece4534"))
+                          ;; personal tasks
+                          ;; dont show WAITING, LONGTERM todo type (long-term)
+                          (:name "Personal tasks"
+                                 :and
+                                 (:file-path "agenda"
+                                             :not (:todo ("WAITING" "LONGTERM" "NONACTIONABLE"))))
+                          ;; project tasks
+                          (:name "Projects"
+                                 :tag "projects")
+                          ;; idea development
+                          (:name "Idea development"
+                                 :file-path "ideas"
+                                 :tag "ideas")
+                          (:name "Oneshot and miscellaneous list"
+                                 :file-path "oneshot")
+                          ;; get rid of rest
+                          (:discard (:anything t))
+                          ))
+                       ))
+             nil))))
+
+  (defun bmorais/show-agenda()
+    "Show agenda as filtered by org-super-agenda as default."
+    (interactive)
+    (org-agenda nil "g"))
+
+  ;; overwrite agenda keybindings
+  (spacemacs/set-leader-keys "aoa" 'bmorais/show-agenda)
+
+  (setq bmorais/agenda-files
+        `(,(concat dotspacemacs-org-directory "personal/agenda.org")
+          ,(concat dotspacemacs-org-directory "personal/ideas.org")
+          ,(concat dotspacemacs-org-directory "neu/neu-agenda.org")
+          ,(concat dotspacemacs-org-directory "oneshot.org")
+          ,(concat dotspacemacs-org-directory "inbox.org")))
+
+  (if (eq 1 1)
+      (with-eval-after-load 'org-ql
+        (setq org-ql-views
+              '(
+                ("Overview: Happening soon"
+                 :buffers-files org-agenda-files
+                 :query (and
+                         (not (done))      ;; not done yet
+                         (ts :from today)  ;; dont show past due items
+                         (planning 7))     ;; show for next 7 days
+                :sort (priority date)
+                :title "Happenning soon")
+                ("Today's Agenda"
+                 :buffers-files org-agenda-files
+                 :query (and
+                         (or
+                         (ts-active :on today)
+                         (deadline auto)
+                         (scheduled :to today))
+                         (not (done)))
+                 :sort (priority)
+                 :title "Today's Agenda"
+                 :super-groups (
+                                (:name "Critical / Overdue"
+                                       :tag "critical"
+                                       :deadline past
+                                       :priority "A")
+                                )
+                 )
+                )
+              )
+        ))
+
+  ;; Configure org-agenda
+  (with-eval-after-load 'org-agenda
+    (setq org-agenda-span 'day)
+    (require 'org-projectile)
+    (require 'org-super-agenda)
+    ;; configure "theme"
+    (setq org-agenda-block-separator nil)
+    (setq org-agenda-compact-blocks t)
+    (setq org-refile-targets
+          '((bmorais/agenda-files :maxlevel . 3)))
+    (add-to-list 'org-agenda-custom-commands `,bmorais/org-agenda-todo-view)
+    (org-super-agenda-mode 1)
+    (mapcar '(lambda (file)
+               (when (file-exists-p file)
+                 (push file org-agenda-files)))
+            (org-projectile-todo-files)))
 
   ;; auto-format python
   (setq blacken-line-length 79) ;; PEP-8 annoying value
@@ -475,11 +647,13 @@ you should place your code here."
 
   (doom-themes-org-config)
   (doom-themes-neotree-config)
-  (customize-set-variable 'helm-ff-lynx-style-map t)
+  ;; (customize-set-variable 'helm-ff-lynx-style-map t)
 
   ;; transparency
   (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
   (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
+
+  ;; lsp stuff
   (setq lsp-file-watch-threshold 2000)
   (setq company-lsp-cache-candidates 'auto)
 
@@ -497,7 +671,7 @@ you should place your code here."
   (spacemacs/set-leader-keys "bf" 'focus-mode)
 
   ;; deft directory
-  (setq deft-directory (concat dotspacemacs-org-directory "/zettelkasten"))
+  (setq deft-directory (concat dotspacemacs-org-directory "zettelkasten"))
   (setq deft-recursive t)
 
   (slack-register-team
@@ -512,7 +686,18 @@ you should place your code here."
   ;; icons in dired mode
   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
 
+  ;; icons for ivy
   (all-the-icons-ivy-rich-mode 1)
+
+  ;; save automatically on clock in/out
+  (add-hook 'org-clock-in-hook #'save-buffer)
+  (add-hook 'org-clock-out-hook #'save-buffer)
+
+  ;; auto-activate magit-todos mode
+  (with-eval-after-load 'magit
+    (magit-todos-mode 1)
+    )
+
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
@@ -543,19 +728,15 @@ This function is called at the very end of Spacemacs initialization."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   (quote
-    ("a8c210aa94c4eae642a34aaf1c5c0552855dfca2153fa6dd23f3031ce19453d4" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "11e57648ab04915568e558b77541d0e94e69d09c9c54c06075938b6abc0189d8" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
+   '("a8c210aa94c4eae642a34aaf1c5c0552855dfca2153fa6dd23f3031ce19453d4" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "11e57648ab04915568e558b77541d0e94e69d09c9c54c06075938b6abc0189d8" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default))
  '(evil-want-Y-yank-to-eol nil)
  '(nil nil t)
  '(org-agenda-files
-   (quote
-    ("~/work/org/neu/neu-agenda.org" "~/work/org/personal/agenda.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/neu/esl/4534clock2020.org")))
+   '("~/work/org/inbox.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/neu/neu-agenda.org" "~/work/org/personal/agenda.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/neu/esl/4534clock2020.org"))
  '(package-selected-packages
-   (quote
-    (graphviz-dot-mode sedona-mode ox-gfm auctex-latexmk magit-popup git-commit with-editor espresso-theme eshell-z eshell-prompt-extras esh-help emmet-mode dracula-theme django-theme disaster darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme csv-mode company-web web-completion-data company-tern dash-functional tern company-statistics company-shell company-ghci company-ghc ghc haskell-mode company-cabal company-c-headers company-auctex company-anaconda company color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode cmm-mode cmake-mode clues-theme clang-format chruby cherry-blossom-theme busybee-theme bundler inf-ruby bubbleberry-theme birds-of-paradise-plus-theme biblio biblio-core badwolf-theme auto-yasnippet yasnippet auctex apropospriate-theme anti-zenburn-theme anaconda-mode pythonic ample-zen-theme ample-theme alect-themes afternoon-theme auto-complete imenu-list ibuffer-projectile slack emojify circe oauth2 websocket jedi-direx direx jedi company-jedi jedi-core python-environment epc ctable concurrent deferred ac-ispell realgud test-simple loc-changes load-relative textx-mode sc-mode org-journal nlinum kivy-mode zenburn-theme zen-and-art-theme yapfify yaml-mode xterm-color white-sand-theme web-mode web-beautify underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme stickyfunc-enhance srefactor spotify spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slim-mode shell-pop seti-theme scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reverse-theme rebecca-theme rbenv rake railscasts-theme pyvenv pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme plantuml-mode planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme orgit organic-green-theme org-ref pdf-tools key-chord ivy tablist org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme multi-term monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minitest minimal-theme material-theme markdown-toc markdown-mode majapahit-theme magit-gitflow magit-gh-pulls madhat2r-theme lush-theme livid-mode skewer-mode simple-httpd live-py-mode light-soap-theme json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc jbeans-theme jazz-theme multi xcscope parsebib gitignore-mode gh marshal logito pcache ht pos-tip flycheck magit ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint evil-unimpaired evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line avy highlight evil goto-chg undo-tree dash helm popup helm-core async ir-black-theme intero insert-shebang inkpot-theme indent-guide hydra hy-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation heroku-theme hemisu-theme helm-themes helm-spotify-plus helm-pydoc helm-projectile helm-mode-manager helm-make helm-hoogle helm-gtags helm-gitignore helm-flx helm-descbinds helm-css-scss helm-cscope helm-company helm-c-yasnippet helm-bibtex helm-ag hc-zenburn-theme haskell-snippets haml-mode gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio gnuplot github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags gandalf-theme fuzzy flycheck-pos-tip flycheck-haskell flx-ido flatui-theme flatland-theme fish-mode fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exotica-theme exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit)))
+   '(graphviz-dot-mode sedona-mode ox-gfm auctex-latexmk magit-popup git-commit with-editor espresso-theme eshell-z eshell-prompt-extras esh-help emmet-mode dracula-theme django-theme disaster darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme csv-mode company-web web-completion-data company-tern dash-functional tern company-statistics company-shell company-ghci company-ghc ghc haskell-mode company-cabal company-c-headers company-auctex company-anaconda company color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode cmm-mode cmake-mode clues-theme clang-format chruby cherry-blossom-theme busybee-theme bundler inf-ruby bubbleberry-theme birds-of-paradise-plus-theme biblio biblio-core badwolf-theme auto-yasnippet yasnippet auctex apropospriate-theme anti-zenburn-theme anaconda-mode pythonic ample-zen-theme ample-theme alect-themes afternoon-theme auto-complete imenu-list ibuffer-projectile slack emojify circe oauth2 websocket jedi-direx direx jedi company-jedi jedi-core python-environment epc ctable concurrent deferred ac-ispell realgud test-simple loc-changes load-relative textx-mode sc-mode org-journal nlinum kivy-mode zenburn-theme zen-and-art-theme yapfify yaml-mode xterm-color white-sand-theme web-mode web-beautify underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme stickyfunc-enhance srefactor spotify spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slim-mode shell-pop seti-theme scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reverse-theme rebecca-theme rbenv rake railscasts-theme pyvenv pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme plantuml-mode planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme orgit organic-green-theme org-ref pdf-tools key-chord ivy tablist org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme multi-term monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minitest minimal-theme material-theme markdown-toc markdown-mode majapahit-theme magit-gitflow magit-gh-pulls madhat2r-theme lush-theme livid-mode skewer-mode simple-httpd live-py-mode light-soap-theme json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc jbeans-theme jazz-theme multi xcscope parsebib gitignore-mode gh marshal logito pcache ht pos-tip flycheck magit ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint evil-unimpaired evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line avy highlight evil goto-chg undo-tree dash helm popup helm-core async ir-black-theme intero insert-shebang inkpot-theme indent-guide hydra hy-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation heroku-theme hemisu-theme helm-themes helm-spotify-plus helm-pydoc helm-projectile helm-mode-manager helm-make helm-hoogle helm-gtags helm-gitignore helm-flx helm-descbinds helm-css-scss helm-cscope helm-company helm-c-yasnippet helm-bibtex helm-ag hc-zenburn-theme haskell-snippets haml-mode gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio gnuplot github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags gandalf-theme fuzzy flycheck-pos-tip flycheck-haskell flx-ido flatui-theme flatland-theme fish-mode fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exotica-theme exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit))
  '(safe-local-variable-values
-   (quote
-    ((eval dap-register-debug-template "Debug sdc"
+   '((eval dap-register-debug-template "Debug sdc"
            (list :type "python" :request "launch" :args "-v debug/join.hr compile" :name "Run Configuration"))
      (eval dap-register-debug-template "Debug sdc"
            (list :type "python" :request "launch" :args "-v examples/simple_broad.hr compile" :name "Run Configuration"))
@@ -569,7 +750,7 @@ This function is called at the very end of Spacemacs initialization."
            (dap-register-debug-template "Example Configuration"
                                         (list :type "java" :request "launch" :args "" :name "Run Configuration")))
      (javascript-backend . tern)
-     (javascript-backend . lsp))))
+     (javascript-backend . lsp)))
  '(verilog-auto-newline nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
