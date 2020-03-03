@@ -395,18 +395,13 @@ you should place your code here."
   ;; org config
   (with-eval-after-load 'org
     (setq org-directory dotspacemacs-org-directory)
-    ;; (setq org-agenda-files '("/home/bruno/work/org"))
     (require 'org-protocol)
     (setq org-journal-enable-agenda-integration t)
     (setq org-journal-dir (concat dotspacemacs-org-directory "journal"))
     (setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
     (org-babel-do-load-languages 'org-babel-load-languages
-                                 '(
-                                   (plantuml . t)
-                                   (shell . t)
-                                   (R . t)
-                                   (python . t)
-                                   ))
+                                 '((plantuml . t) (shell . t) (R . t) (python . t)))
+
     ;; org capture templates stolen from https://blog.jethro.dev/posts/capturing_inbox/ and modified
     (setq org-capture-templates
           `(("i" "inbox" entry (file ,(concat dotspacemacs-org-directory "inbox.org"))
@@ -423,108 +418,72 @@ you should place your code here."
              "* NEXT %? :actionable:oneshot:" :immediate-finisht t :clock-in t)
             ))
     )
-  ;; (setq spacemacs-theme-org-agenda-height nil
-  ;;       org-agenda-skip-scheduled-if-done t
-  ;;       org-agenda-skip-deadline-if-done t
-  ;;       org-agenda-include-deadlines t
-  ;;       org-agenda-include-diary t
-  ;;       org-agenda-block-separator nil
-  ;;       org-agenda-compact-blocks t
-  ;;       org-agenda-start-with-log-mode t)
-
-  (defun bmorais/get-timestamp-plus-days (daycount)
-    (let* (sec minute hour day mont year dow dst utcoff) (decode-time))
-    (format "%d-%02d-%02d" year month)
-    )
 
   ;; custom agenda view with my categories
   (with-eval-after-load 'org-agenda
-    (setq bmorais/org-agenda-todo-view
-          `("g" "Agenda"
-            (
-             ;; day view
-             (agenda ""
-                     ((org-agenda-span 'day)
-                      (org-deadline-warning-days 365)
-                      (org-super-agenda-groups
-                       '(
-                         ;; time grid
-                         (:discard (:todo "REFILE"))
-                         (:name "Today"
-                                :time-grid t
-                                :date today
-                                :scheduled today)
-                         ;; critical items
-                         (:name "Critical / Overdue"
-                                :tag "critical"
-                                :deadline past
-                                :priority "A"
-                                :transformer(--> it (concat " " (all-the-icons-faicon "exclamation-triangle" :v-adjust 0.1 :height 1.0) it))
-                                )
-                         ;; requires attention -- limit to 30 days, but priority >= B overrides it
-                         (:name "Requires attention"
-                                :tag "important"
-                                :and (:deadline future :deadline (before ,(org-read-date nil nil "+30")))
-                                :priority>= "B")
-                         ;; discard anything else, will show up in the todo-list
-                         (:discard (:anything t))
-                         ))
-                      ))
-             ;; critical item section always visible
-             (alltodo ""
-                      ((org-agenda-overriding-header "")
-                       (org-agenda-span 1)
-                       (org-agenda-compact-blocks t)
-                       (org-agenda-entry-types '(:deadline :scheduled :timestamp))
-                       (org-deadline-warning-days 7)
-                       (org-agenda-todo-keyword-format "")
-                       (org-super-agenda-groups
-                        '(
-                          ;; week preview
-                          (:name "Happening soon"
-                                 :and (:deadline future :deadline (before ,(org-read-date nil nil "+7")))
-                                 :scheduled (before ,(org-read-date nil nil "+7")))
-                          ;; discard anything else, will show up in the todo-list
-                          (:discard (:anything t))
-                          ))
-                       ))
-             ;; to-do list, events etc
-             (alltodo ""
-                      ((org-agenda-overriding-header "")
-                       ;; manually specify files that will be inspected
-                       (org-agenda-files bmorais/agenda-files)
-                       (org-super-agenda-groups
-                        '(
-                          ;; items to be refiled from inbox
-                          (:name "Inbox -> refile"
-                                 :file-path "inbox")
-                          ;; items that are currently in progress
-                          (:name "In progress"
-                                 :todo "NEXT")
-                          ;; WORK tasks
-                          (:name "Work tasks"
-                                 :file-path "neu-agenda"
-                                 :tag ("neu" "eece4534"))
-                          ;; personal tasks
-                          ;; dont show WAITING, LONGTERM todo type (long-term)
-                          (:name "Personal tasks"
-                                 :and
-                                 (:file-path "agenda"
-                                             :not (:todo ("WAITING" "LONGTERM" "NONACTIONABLE"))))
-                          ;; project tasks
-                          (:name "Projects"
-                                 :tag "projects")
-                          ;; idea development
-                          (:name "Idea development"
-                                 :file-path "ideas"
-                                 :tag "ideas")
-                          (:name "Oneshot and miscellaneous list"
-                                 :file-path "oneshot")
-                          ;; get rid of rest
-                          (:discard (:anything t))
-                          ))
-                       ))
-             nil))))
+    (setq
+     bmorais/org-agenda-todo-view
+     `("g" "Agenda"
+       (
+        ;; day view
+        (agenda
+         ""
+         ((org-agenda-span 'day) (org-deadline-warning-days 365)
+          (org-super-agenda-groups
+           '(
+             ;; time grid
+             (:discard (:todo "REFILE")) (:name "Today" :time-grid t :date today :scheduled today)
+             ;; critical items
+             (:name "Critical / Overdue" :tag "critical" :deadline past :priority "A"
+                    :transformer(-->
+                                 it (concat it " " (all-the-icons-faicon "exclamation-triangle" :v-adjust 0.1 :height 1.0))))
+             ;; requires attention -- limit to 30 days, but priority >= B overrides it
+             (:name "Requires attention" :tag "important"
+                    :and (:deadline future :deadline (before ,(org-read-date nil nil "+30"))) :priority>= "B")
+             ;; discard anything else, will show up in the todo-list
+             (:discard (:anything t))
+             ))
+          ))
+        ;; critical item section always visible
+        (alltodo
+         ""
+         ((org-agenda-overriding-header "") (org-agenda-span 1) (org-agenda-compact-blocks t)
+          (org-agenda-entry-types '(:deadline :scheduled :timestamp)) (org-deadline-warning-days 7)
+          (org-agenda-todo-keyword-format "")
+          (org-super-agenda-groups
+           '(
+             ;; week preview
+             (:name "Happening soon" :and (:deadline future :deadline (before ,(org-read-date nil nil "+7")))
+                    :scheduled (before ,(org-read-date nil nil "+7")))
+             ;; discard anything else, will show up in the todo-list
+             (:discard (:anything t))))
+          ))
+        ;; to-do list, events etc
+        (alltodo
+         ""
+         ((org-agenda-overriding-header "") (org-agenda-files bmorais/agenda-files)
+          (org-super-agenda-groups
+           '(
+             ;; items to be refiled from inbox
+             (:name "Inbox -> refile" :file-path "inbox")
+             ;; items that are currently in progress
+             (:name "In progress" :todo "NEXT")
+             ;; WORK tasks
+             (:name "Work tasks" :file-path "neu-agenda" :tag ("neu" "eece4534"))
+             ;; personal tasks
+             ;; dont show WAITING, LONGTERM todo type (long-term)
+             (:name "Personal tasks" :and (:file-path "agenda" :not (:todo ("WAITING" "LONGTERM" "NONACTIONABLE"))))
+             ;; project tasks
+             (:name "Projects" :tag "projects")
+             ;; idea development
+             (:name "Idea development" :file-path "ideas" :tag "ideas")
+             ;; misc items
+             (:name "Oneshot and miscellaneous list" :file-path "oneshot")
+             ;; get rid of rest
+             (:discard (:anything t))
+             ))
+          ))
+        nil))))
 
   (defun bmorais/show-agenda ()
     "Show agenda as filtered by org-super-agenda as default."
@@ -586,105 +545,66 @@ you should place your code here."
           ,(concat dotspacemacs-org-directory "oneshot.org")
           ,(concat dotspacemacs-org-directory "inbox.org")))
 
-  (if (eq 1 1)
-      (with-eval-after-load 'org-ql
-        (setq org-ql-views
-              '(
-                ("Overview: Happening soon"
-                 :buffers-files org-agenda-files
-                 :query (and
-                         (not (done))      ;; not done yet
-                         (ts :from today)  ;; dont show past due items
-                         (planning 7))     ;; show for next 7 days
-                :sort (priority date)
-                :title "Happenning soon"
-                :super-groups
-                (
-                 (:name "Tasks scheduled to happen soon"
-                        :anything t
-                        :transformer(--> it
-                                         (concat " " (all-the-icons-faicon "clock-o" :v-adjust 0.1) it)))
-                 ))
-                ("Overview: Longterm"
-                 :buffers-files org-agenda-files
-                 :query (and
-                         (not (done))      ;; not done yet
-                         (ts-active :from today :to ,(org-read-date nil nil 365))
-                         )   ;; show for next 7 days
-                 :sort (priority date)
-                 :title "Longterm view"
-                 :super-groups
-                 (
-                  (:name "Work-related tasks and appointments"
-                         :and (:file-path "neu-agenda"
-                                          :todo "TODO")
-                         :tag ("esl" "eece4534" "neu"))
-                  (:name "Work-related important dates & events"
-                         :file-path "neu-agenda")
-                  (:name "Personal tasks and appointments"
-                         :and (:file-path "agenda"
-                                          :todo "TODO"))
-                  (:name "Personal important dates & events"
-                         :file-path "agenda")
-                  (:discard (:anything t))
-                  ))
-                ("Today's Agenda"
-                 :buffers-files org-agenda-files
-                 :query (and
-                         (or
-                         (ts-active :on today)
-                         (deadline :to today)
-                         (scheduled :to today))
-                         (not (done)))
-                 :sort (priority)
-                 :title "Today's Agenda"
-                 :super-groups
-                 (
-                  (:name "Due today"
-                         :scheduled today
-                         :deadline today)
-                  (:name "Critical / Overdue"
-                         :tag "critical"
-                         :deadline past
-                         :priority "A")))
-                ("Unscheduled tasks"
-                 :buffers-files org-agenda-files
-                 :query (and (not (done)) (not (ts-active)) (todo) (not (todo "INACTIVE")))
-                 :sort (priority)
-                 :title "Unscheduled tasks"
-                 :super-groups
-                 (
-                  (:name "Work-related"
-                         :tag ("neu" "eece4534" "esl")
-                         :file-path "neu-agenda")
-                  (:name "Personal and others"
-                         :file-path "agenda")))
-                ("Oneshot tasks"
-                 :buffers-files org-agenda-files
-                 :query (and (not (done)) (tags "oneshot"))
-                 :sort (priority)
-                 :title "Oneshot and miscellaneous tasks"
-                 :super-groups ((:name "Isolated, oneshot, misc" :anything t))
-                 )
-                )
-              )
-        ))
+  (defun bmorais/org-ql-hide-from-query ()
+    "Hide stuff from orq-ql queries based on existence of property 'query-hide'"
+    (not (property "query-hide" "yes")))
+
+  ;; setup org-ql views
+  (with-eval-after-load 'org-ql
+    (setq
+     org-ql-views
+     '(
+       ;; items that are happening soon, scheduled, deadline or timestamps
+       ("Overview: Happening soon" :buffers-files org-agenda-files
+        :query (and (not (done)) (ts :from today) (planning 7))
+        :sort (priority date) :title "Happenning soon"
+        :super-groups
+        (
+         (:name "Tasks scheduled to happen soon" :anything t
+                :transformer(--> it (concat " " (all-the-icons-faicon "clock-o" :v-adjust 0.1) it)))
+         ))
+       ;; Longterm overview: shows the next 365 days for active timestamps
+       ("Overview: Longterm" :buffers-files org-agenda-files
+        :query (and (not (done)) (ts-active :from today :to ,(org-read-date nil nil 365))
+                    (bmorais/org-ql-hide-from-query))
+        :sort (priority date) :title "Longterm view" :super-groups
+        ((:name "Work-related tasks and appointments" :and (:file-path "neu-agenda" :todo "TODO")
+                :tag ("esl" "eece4534" "neu"))
+         (:name "Work-related important dates & events" :file-path "neu-agenda")
+         (:name "Personal tasks and appointments" :and (:file-path "agenda" :todo "TODO"))
+         (:name "Personal important dates & events" :file-path "agenda")
+         ;; discard everything else
+         (:discard (:anything t))))
+       ;; Today's agenda: what is due today
+       ("Today's Agenda" :buffers-files org-agenda-files
+        :query (and (or (ts-active :on today) (deadline :to today) (scheduled :to today)) (not (done)))
+        :sort (priority)
+        :title "Today's Agenda"
+        :super-groups ((:name "Due today" :scheduled today :deadline today)
+                       (:name "Critical / Overdue" :tag "critical" :deadline past :priority "A")))
+       ;; Unscheduled tasks: show all unscheduled tasks
+       ("Unscheduled tasks" :buffers-files org-agenda-files
+        :query (and (not (done)) (not (ts-active)) (todo) (not (todo "INACTIVE")))
+        :sort (priority) :title "Unscheduled tasks" :super-groups
+        ((:name "Work-related" :tag ("neu" "eece4534" "esl") :file-path "neu-agenda")
+         (:name "Personal and others" :file-path "agenda")))
+       ;; Oneshot: miscellaneous stuff, one off items
+       ("Oneshot tasks" :buffers-files org-agenda-files
+        :query (and (not (done)) (tags "oneshot")) :sort (priority) :title "Oneshot and miscellaneous tasks"
+        :super-groups ((:name "Isolated, oneshot, misc" :anything t)))))
+    )
 
   ;; Configure org-agenda
   (with-eval-after-load 'org-agenda
     (setq org-agenda-span 'day)
     (require 'org-projectile)
     (require 'org-super-agenda)
-    ;; configure "theme"
     (setq org-agenda-block-separator nil)
     (setq org-agenda-compact-blocks t)
-    (setq org-refile-targets
-          '((bmorais/agenda-files :maxlevel . 2)))
+    (setq org-refile-targets '((bmorais/agenda-files :maxlevel . 2)))
     (add-to-list 'org-agenda-custom-commands `,bmorais/org-agenda-todo-view)
     (org-super-agenda-mode 1)
-    (mapcar '(lambda (file)
-               (when (file-exists-p file)
-                 (push file org-agenda-files)))
+    (mapcar '(lambda (file) (when (file-exists-p file) (push file org-agenda-files)))
             (org-projectile-todo-files)))
 
   ;; auto-format python
@@ -763,7 +683,7 @@ you should place your code here."
 
   ;; enable fill ruler
   (spacemacs/add-to-hooks 'spacemacs/toggle-fill-column-indicator-on
-                          '(python-mode-hook c-mode-hook scala-mode-hook))
+                          '(python-mode-hook c-mode-hook scala-mode-hook elisp-mode))
 
   ;; lsp-focus
   (add-hook 'focus-mode-hook #'lsp-focus-mode)
@@ -794,9 +714,7 @@ you should place your code here."
   (add-hook 'org-clock-out-hook #'save-buffer)
 
   ;; auto-activate magit-todos mode
-  (with-eval-after-load 'magit
-    (magit-todos-mode 1)
-    )
+  (with-eval-after-load 'magit (magit-todos-mode 1))
 
   ;; (setq dashboard-set-heading-icons t)
   ;; (setq dashboard-set-file-icons t)
