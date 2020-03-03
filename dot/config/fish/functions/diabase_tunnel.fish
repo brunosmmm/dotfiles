@@ -1,3 +1,4 @@
+
 function diabase_tunnel -a cmd -d "Enable ssh tunnel to diabase"
     switch "$cmd"
         case enable
@@ -24,3 +25,4 @@ function diabase_tunnel -a cmd -d "Enable ssh tunnel to diabase"
             echo "invalid command; available: enable, disable, status"
     end
 end
+

@@ -86,6 +86,7 @@ values."
                                       magit-todos
                                       focus
                                       (lsp-focus :location (recipe :fetcher github :repo "emacs-lsp/lsp-focus"))
+                                      ;; dashboard
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -163,9 +164,9 @@ values."
    ;; `recents' `bookmarks' `projects' `agenda' `todos'."
    ;; List sizes may be nil, in which case
    ;; `spacemacs-buffer-startup-lists-length' takes effect.
-   dotspacemacs-startup-lists '((recents . 5)
-                                (bookmarks . 5)
-                                (projects . 7))
+   dotspacemacs-startup-lists '((recents . 8)
+                                (bookmarks . 8)
+                                (projects . 8))
    ;; True if the home buffer should respond to resize events.
    dotspacemacs-startup-buffer-responsive t
    ;; Default major mode of the scratch buffer (default `text-mode')
@@ -797,6 +798,20 @@ you should place your code here."
     (magit-todos-mode 1)
     )
 
+  ;; (setq dashboard-set-heading-icons t)
+  ;; (setq dashboard-set-file-icons t)
+  ;; (setq show-week-agenda-p t)
+  ;; (setq dashboard-items '((recents  . 8)
+  ;;                         (bookmarks . 8)
+  ;;                         (projects . 8)
+  ;;                         (agenda . 5)))
+
+  ;; (require 'dashboard)
+  ;; (dashboard-insert-startupify-lists)
+  ;; (kill-buffer "*spacemacs*")
+  ;; (switch-to-buffer "*dashboard*")
+  ;; ;; override spacemacs buffer keybinding
+  ;; (spacemacs/set-leader-keys "bh" (lambda () (interactive) (switch-to-buffer "*dashboard*")))
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
