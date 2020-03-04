@@ -62,7 +62,12 @@ def inspect(dot_path, home_path, fname, diff=False):
 
 
 def update(
-    dot_path, home_path, interactive=False, quiet=False, direction="repo"
+    dot_path,
+    home_path,
+    interactive=False,
+    quiet=False,
+    install_new=False,
+    direction="repo",
 ):
     """Perform update."""
     ins = GitDotfileInspector(dot_path, home_path)
@@ -112,10 +117,13 @@ def update(
         # update already occurred
         exit(0)
 
-    choice = input("Update repository? [y/n]") if quiet is False else "y"
+    if reverse:
+        choice = input("Update home folder [y/n]") if quiet is False else "y"
+    else:
+        choice = input("Update repository? [y/n]") if quiet is False else "y"
 
     if choice == "y":
         # update
-        update_all(changes)
+        update_all(changes, install_new=install_new, reverse=reverse)
     else:
         print("Aborted")
