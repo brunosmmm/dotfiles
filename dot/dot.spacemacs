@@ -487,50 +487,39 @@ you should place your code here."
 
   (defun bmorais/show-agenda ()
     "Show agenda as filtered by org-super-agenda as default."
-    (interactive)
-    (org-agenda nil "g"))
+    (interactive) (org-agenda nil "g"))
 
   (defun bmorais/show-ql-soon ()
     "Show org-ql-view."
-    (interactive)
-    (org-ql-view "Overview: Happening soon")
-    )
+    (interactive) (org-ql-view "Overview: Happening soon"))
 
   (defun bmorais/show-ql-today ()
     "Show orq-ql-view for today."
-    (interactive)
-    (org-ql-view "Today's Agenda")
-    )
+    (interactive) (org-ql-view "Today's Agenda"))
 
   (defun bmorais/show-ql-longterm ()
     "Show orq-ql-view for longterm."
-    (interactive)
-    (org-ql-view "Overview: Longterm")
-    )
+    (interactive) (org-ql-view "Overview: Longterm"))
 
   (defun bmorais/show-ql-unsched ()
     "Show unscheduled tasks"
-    (interactive)
-    (org-ql-view "Unscheduled tasks"))
+    (interactive) (org-ql-view "Unscheduled tasks"))
 
   (defun bmorais/show-ql-misc ()
     "Show miscellaneous tasks"
-    (interactive)
-    (org-ql-view "Oneshot tasks"))
-
-  (defun bmorais/match-tag-icon (tag)
-    "Match tag regular expression to a fontawesome icon"
-    (setq tag-to-icon '(("travel" . "plane")))
-    )
-
-  (defun bmorais/transform-agenda-line (line)
-    "Parse line with regular expression and transform."
-    )
+    (interactive) (org-ql-view "Oneshot tasks"))
 
   (defun bmorais/show-ql-clocks ()
     "Show project clocks."
-    (interactive) (org-ql-view "Project clocks")
-    )
+    (interactive) (org-ql-view "Project clocks"))
+
+  (defun bmorais/show-ql-next ()
+    "Show next / current tasks."
+    (interactive) (org-ql-view "In progress"))
+
+  (defun bmorais/show-ql-todos ()
+    "Show all TODOs"
+    (interactive) (org-ql-view "All TODOs"))
 
   ;; overwrite agenda keybindings
   (spacemacs/set-leader-keys "aoa" 'bmorais/show-agenda)
@@ -542,6 +531,8 @@ you should place your code here."
   (spacemacs/set-leader-keys "aoqu" 'bmorais/show-ql-unsched)
   (spacemacs/set-leader-keys "aoqm" 'bmorais/show-ql-misc)
   (spacemacs/set-leader-keys "aoqc" 'bmorais/show-ql-clocks)
+  (spacemacs/set-leader-keys "aoqn" 'bmorais/show-ql-next)
+  (spacemacs/set-leader-keys "aoqT" 'bmorais/show-ql-todos)
 
   (setq bmorais/agenda-files
         `(,(concat dotspacemacs-org-directory "personal/agenda.org")
@@ -562,12 +553,12 @@ you should place your code here."
      '(
        ;; items that are happening soon, scheduled, deadline or timestamps
        ("Overview: Happening soon" :buffers-files org-agenda-files
-        :query (and (not (done)) (ts :from today) (planning 7))
+        :query (and (not (done)) (ts) (planning 7))
         :sort (priority date) :title "Happenning soon"
         :super-groups
         (
-         (:name "Tasks scheduled to happen soon" :anything t
-                :transformer(--> it (concat " " (all-the-icons-faicon "clock-o" :v-adjust 0.1) it)))
+         (:name "Overdue tasks" :scheduled past :deadline past :order 1)
+         (:name "Tasks scheduled to happen soon" :anything t :order 0)
          ))
        ;; Longterm overview: shows the next 365 days for active timestamps
        ("Overview: Longterm" :buffers-files org-agenda-files
@@ -578,7 +569,8 @@ you should place your code here."
                 :tag ("esl" "eece4534" "neu"))
          (:name "Work-related important dates & events" :file-path "neu-agenda")
          (:name "Personal tasks and appointments" :and (:file-path "agenda" :todo "TODO"))
-         (:name "Personal important dates & events" :file-path "agenda")
+         (:name "Personal important dates & events" :file-path "agenda"
+                :transformer (--> it ))
          ;; discard everything else
          (:discard (:anything t))))
        ;; Today's agenda: what is due today
@@ -592,15 +584,24 @@ you should place your code here."
        ("Unscheduled tasks" :buffers-files org-agenda-files
         :query (and (not (done)) (not (ts-active)) (todo) (not (todo "INACTIVE")))
         :sort (priority) :title "Unscheduled tasks" :super-groups
-        ((:name "Work-related" :tag ("neu" "eece4534" "esl") :file-path "neu-agenda")
+        ((:auto-property "project-name")
+         (:name "Work-related" :tag ("neu" "eece4534" "esl") :file-path "neu-agenda")
          (:name "Personal and others" :file-path "agenda")))
        ;; Oneshot: miscellaneous stuff, one off items
        ("Oneshot tasks" :buffers-files org-agenda-files
-        :query (and (not (done)) (tags "oneshot")) :sort (priority) :title "Oneshot and miscellaneous tasks"
+        :query (and (not (done)) (or (tags "oneshot") (todo "REFILE"))) :sort (priority) :title "Oneshot and miscellaneous tasks"
         :super-groups ((:name "Isolated, oneshot, misc" :anything t)))
        ;; Project clocks
        ("Project clocks" :buffers-files (lambda () (directory-files-recursively dotspacemacs-org-directory "^[^#]+\.org$"))
-        :query (property "project-clock") :title "Project clocks")))
+        :query (and (not (done)) (or (property "project-clock") (clocked))) :title "Project clocks"
+        :super-groups ((:auto-property "project-name") (:name "Uncategorized clocks" :auto-group t)))
+       ("In progress" :buffers-files org-agenda-files
+        :query (todo "NEXT") :title "In progress"
+        :super-groups ((:auto-property "project-name") (:auto-group t)))
+       ("All TODOs" :buffers-files (lambda () (directory-files-recursively dotspacemacs-org-directory "^\\(^archived\\)?[^#]+\.org$"))
+        :query (and (todo) (not (done)) (not (property "query-hide" "yes")) (not (org-entry-get (point) "archived" 'inherit))
+                    (not (todo "INACTIVE")) (not (todo "REFILE"))) :title "All TODO items"
+        :super-groups ((:auto-property "project-name") (:auto-group t) (:auto-category t)))))
     )
 
   ;; Configure org-agenda
@@ -741,19 +742,24 @@ you should place your code here."
   ;; (spacemacs/set-leader-keys "bh" (lambda () (interactive) (switch-to-buffer "*dashboard*")))
 
   ;; customize org-super-agenda and other org styles
-  (with-eval-after-load 'org-super-agenda
-    (set-face-attribute 'org-super-agenda-header nil
-                        :font "Iosevka Bold 18"
-                        :overline t)
+  (with-eval-after-load 'org-ql-view
     (set-face-attribute 'org-ql-view-due-date nil
                         :weight 'bold
                         :slant 'oblique
                         :foreground "DarkOrange1"
-                        :underline t)
+                        :underline t))
+  (with-eval-after-load 'org-super-agenda
+    (set-face-attribute 'org-super-agenda-header nil
+                        :font "Iosevka Bold 18"
+                        :overline t))
+  (with-eval-after-load 'org
     (set-face-attribute 'org-todo nil
                         :foreground "#252525"
                         :background "#ffb300"
                         :distant-foreground "#ffb300"))
+
+  ;; FIXME workaround for recursive load
+  (require 'window-purpose)
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
