@@ -80,10 +80,15 @@ def update(
     reverse = direction == "home"
 
     if quiet is False:
+        counted_changes = [
+            changed
+            for changed, new_file in changes.values()
+            if new_file and install_new or new_file is False
+        ]
         print(
             "{} files have changed{}".format(
-                "No" if not changes else len(changes),
-                "" if not changes else ":",
+                "No" if not counted_changes else len(counted_changes),
+                "" if not counted_changes else ":",
             )
         )
     if not changes:
@@ -93,6 +98,9 @@ def update(
     if quiet is False:
         for dest, (src, new_file) in changes.items():
             if interactive is True:
+                if new_file is True and install_new is False:
+                    # skip
+                    continue
                 if reverse is True and new_file is True:
                     choice = input(f"{dest} (new) [install (i)/skip (s)]")
                     # replace i with u, all the same
