@@ -74,7 +74,7 @@ class GitDotfileInspector:
             if not os.path.exists(user_file):
                 continue
             if files_differ(repo_file, user_file):
-                changed_files[repo_file] = user_file
+                changed_files[repo_file] = (user_file, False)
 
         return changed_files
 
@@ -86,9 +86,10 @@ class GitDotfileInspector:
         changed_files = {}
         for repo_file, user_file in file_map.items():
             if not os.path.exists(user_file):
+                changed_files[user_file] = (repo_file, True)
                 continue
             if files_differ(user_file, repo_file):
-                changed_files[user_file] = repo_file
+                changed_files[user_file] = (repo_file, False)
 
         return changed_files
 

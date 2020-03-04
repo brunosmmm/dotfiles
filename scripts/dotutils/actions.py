@@ -85,22 +85,27 @@ def update(
         exit(0)
 
     if quiet is False:
-        for changed in changes:
+        for dest, (src, new_file) in changes.items():
             if interactive is True:
-                choice = input(f"{changed} [update (u)/skip (s)/diff (d)]?")
+                if reverse is True and new_file is True:
+                    choice = input(f"{dest} (new) [install (i)/skip (s)]")
+                    # replace i with u, all the same
+                    choice = "u" if choice == "i" else "s"
+                else:
+                    choice = input(f"{dest} [update (u)/skip (s)/diff (d)]?")
                 if choice == "u":
-                    update_file(changes[changed], changed)
+                    update_file(src, dest)
                 elif choice == "d":
-                    print(ins.diff_file(changed, reverse=reverse))
-                    choice = input(f"{changed} [update (u)/skip (s)]?")
+                    print(ins.diff_file(dest, reverse=reverse))
+                    choice = input(f"{dest} [update (u)/skip (s)]?")
                     if choice == "u":
-                        update_file(changes[changed], changed)
+                        update_file(src, dest)
                     else:
                         print("skipped")
                 else:
                     print("skipped")
             else:
-                print(changed)
+                print(dest)
 
     if interactive is True:
         # update already occurred
