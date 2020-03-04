@@ -26,13 +26,14 @@ def update_file(user_file, repo_file, reverse=False):
             print(f"WARNING: postaction '{name}' failed for file '{fname}'")
 
 
-def update_all(changes, reverse=False):
+def update_all(changes, reverse=False, install_new=False):
     """Update all files."""
-    for repo_file, (user_file, _) in changes.items():
+    for repo_file, (user_file, new_file) in changes.items():
         if os.path.islink(repo_file):
             # leave symlinks alone
             continue
-        update_file(user_file, repo_file, reverse)
+        if not new_file or (new_file and install_new):
+            update_file(user_file, repo_file, reverse)
 
     ret = POST_ACTION_MGR.decide_postaction(
         PostActionMgr.POSTACTION_UPDATE_ALL
