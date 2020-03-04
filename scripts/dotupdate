@@ -55,6 +55,9 @@ if __name__ == "__main__":
     install_parser = subparsers.add_parser(
         "install", help="install dotfiles to home directory"
     )
+    install_parser.add_argument(
+        "--new-files", help="Install new files", action="store_true"
+    )
     parser.add_argument(
         "--home", help="home directory path", default=os.environ["HOME"]
     )
@@ -106,7 +109,12 @@ if __name__ == "__main__":
         )
     elif args.cmd == "install":
         update(
-            args.p, args.home, args.interactive, args.quiet, direction="home"
+            args.p,
+            args.home,
+            args.interactive,
+            args.quiet,
+            direction="home",
+            install_new=args.new_files,
         )
     elif args.cmd == "inspect":
         ret = inspect(args.p, args.home, args.fname, args.diff)
