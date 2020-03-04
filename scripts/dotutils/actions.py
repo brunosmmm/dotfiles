@@ -28,7 +28,7 @@ def update_file(user_file, repo_file, reverse=False):
 
 def update_all(changes, reverse=False):
     """Update all files."""
-    for repo_file, user_file in changes.items():
+    for repo_file, (user_file, _) in changes.items():
         if os.path.islink(repo_file):
             # leave symlinks alone
             continue
