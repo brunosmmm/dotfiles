@@ -739,6 +739,21 @@ you should place your code here."
   ;; (switch-to-buffer "*dashboard*")
   ;; ;; override spacemacs buffer keybinding
   ;; (spacemacs/set-leader-keys "bh" (lambda () (interactive) (switch-to-buffer "*dashboard*")))
+
+  ;; customize org-super-agenda and other org styles
+  (with-eval-after-load 'org-super-agenda
+    (set-face-attribute 'org-super-agenda-header nil
+                        :font "Iosevka Bold 18"
+                        :overline t)
+    (set-face-attribute 'org-ql-view-due-date nil
+                        :weight 'bold
+                        :slant 'oblique
+                        :foreground "DarkOrange1"
+                        :underline t)
+    (set-face-attribute 'org-todo nil
+                        :foreground "#252525"
+                        :background "#ffb300"
+                        :distant-foreground "#ffb300"))
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
