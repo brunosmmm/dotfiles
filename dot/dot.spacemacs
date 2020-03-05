@@ -415,7 +415,12 @@ you should place your code here."
             ("a" "actionable" entry (file ,(concat dotspacemacs-org-directory "oneshot.org"))
              "* TODO %? :actionable:oneshot:")
             ("A" "actionable (immediate)" entry (file ,(concat dotspacemacs-org-directory "oneshot.org"))
-             "* NEXT %? :actionable:oneshot:" :immediate-finisht t :clock-in t)
+             "* NEXT %? :actionable:oneshot:" :clock-in t)
+            ("L" "shopping list item")
+            ("Lg" "groceries" checkitem (id "a0db56ce-b7af-4c74-b53e-03d3c096fc8c")
+             "- [ ] %?")
+            ("Lo" "other items" checkitem (id "cdba90be-e668-470a-a4bf-eaca8c11dfd9")
+             "- [ ] %?")
             ))
     )
 
