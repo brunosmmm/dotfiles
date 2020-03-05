@@ -2,6 +2,7 @@
 # configure theme more
 set -g theme_nerd_fonts yes
 set -x VIRTUAL_ENV_DISABLE_PROMPT 1
+set -x ORGDIR "$HOME/work/org"
 
 # virtualfish
 eval (python -m virtualfish auto_activation projects)
