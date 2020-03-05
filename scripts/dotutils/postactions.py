@@ -80,9 +80,9 @@ class FileInstallPostAction(FileExtPostAction):
         """Initialize."""
         super().__init__(file_ext)
 
-    def will_act(self, file_name: str, reverse: bool) -> bool:
+    def will_act(self, file_name: str, direction: str) -> bool:
         """Decide."""
-        if reverse is False:
+        if direction == "home":
             return False
         return super().will_act(file_name)
 
@@ -94,8 +94,8 @@ class FileUpdatePostAction(FileExtPostAction):
         """Initialize."""
         super().__init__(file_ext)
 
-    def will_act(self, file_name: str, reverse: bool) -> bool:
-        if reverse is False:
+    def will_act(self, file_name: str, direction: str) -> bool:
+        if direction == "repo":
             return super().will_act(file_name)
         return False
 
@@ -140,8 +140,10 @@ def make_shell_post_action(
             """Initialize."""
             super().__init__(file_ext)
 
-        def act(self, user_file: str, repo_file: str, reverse: str) -> bool:
+        def act(self, src: str, dest: str, fs_dir: str) -> bool:
             """Call shell command."""
+            user_file = src if fs_dir == "repo" else dest
+            repo_file = src if fs_dir == "home" else dest
             cmd = re.sub(USER_FILE_SUB_REGEX, user_file, shell_cmd)
             cmd = re.sub(REPO_FILE_SUB_REGEX, repo_file, cmd)
             cmd = re.sub(DIRECTION_SUB_REGEX, direction, cmd)

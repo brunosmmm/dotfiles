@@ -6,15 +6,16 @@ from dotutils.git import GitDotfileInspector
 from dotutils.postactions import POST_ACTION_MGR, PostActionMgr
 
 
-def update_file(user_file, repo_file, reverse=False):
+def update_file(src, dest, direction):
     """Update a file."""
-    if reverse:
-        shutil.copyfile(repo_file, user_file, follow_symlinks=False)
-    else:
-        shutil.copyfile(user_file, repo_file, follow_symlinks=False)
+
+    if direction not in ("home", "repo"):
+        raise ValueError("direction must be either home or repo")
+
+    shutil.copyfile(src, dest, follow_symlinks=False)
 
     ret = POST_ACTION_MGR.decide_postaction(
-        PostActionMgr.POSTACTION_UPDATE, user_file, repo_file, reverse
+        PostActionMgr.POSTACTION_UPDATE, src, dest, direction
     )
     for idx, retval in enumerate(ret):
         if retval is False:
@@ -22,18 +23,17 @@ def update_file(user_file, repo_file, reverse=False):
             name, _ = POST_ACTION_MGR.get_postaction_description(
                 PostActionMgr.POSTACTION_UPDATE, idx
             )
-            fname = user_file if reverse else repo_file
-            print(f"WARNING: postaction '{name}' failed for file '{fname}'")
+            print(f"WARNING: postaction '{name}' failed for file '{dest}'")
 
 
-def update_all(changes, reverse=False, install_new=False):
+def update_all(changes, direction, install_new=False):
     """Update all files."""
     for repo_file, (user_file, new_file) in changes.items():
         if os.path.islink(repo_file):
             # leave symlinks alone
             continue
         if not new_file or (new_file and install_new):
-            update_file(user_file, repo_file, reverse)
+            update_file(user_file, repo_file, direction)
 
     ret = POST_ACTION_MGR.decide_postaction(
         PostActionMgr.POSTACTION_UPDATE_ALL
@@ -43,7 +43,7 @@ def update_all(changes, reverse=False, install_new=False):
             name, _ = POST_ACTION_MGR.get_postaction_description(
                 PostActionMgr.POSTACTION_UPDATE, idx
             )
-            fname = user_file if reverse else repo_file
+            fname = user_file if direction == "home" else repo_file
             print(f"WARNING: postaction '{name}' failed for file '{fname}'")
 
 
@@ -77,7 +77,6 @@ def update(
     if direction not in ("repo", "home"):
         raise ValueError("direction must be either home or repo")
     changes = ins.changes if direction == "repo" else ins.reverse_changes
-    reverse = direction == "home"
 
     if quiet is False:
         counted_changes = [
@@ -101,19 +100,19 @@ def update(
                 if new_file is True and install_new is False:
                     # skip
                     continue
-                if reverse is True and new_file is True:
+                if direction == "home" and new_file is True:
                     choice = input(f"{dest} (new) [install (i)/skip (s)]")
                     # replace i with u, all the same
                     choice = "u" if choice == "i" else "s"
                 else:
                     choice = input(f"{dest} [update (u)/skip (s)/diff (d)]?")
                 if choice == "u":
-                    update_file(src, dest)
+                    update_file(src, dest, direction)
                 elif choice == "d":
-                    print(ins.diff_file(dest, reverse=reverse))
+                    print(ins.diff_file(dest, direction))
                     choice = input(f"{dest} [update (u)/skip (s)]?")
                     if choice == "u":
-                        update_file(src, dest)
+                        update_file(src, dest, direction)
                     else:
                         print("skipped")
                 else:
@@ -125,13 +124,13 @@ def update(
         # update already occurred
         exit(0)
 
-    if reverse:
+    if direction == "home":
         choice = input("Update home folder [y/n]") if quiet is False else "y"
     else:
         choice = input("Update repository? [y/n]") if quiet is False else "y"
 
     if choice == "y":
         # update
-        update_all(changes, install_new=install_new, reverse=reverse)
+        update_all(changes, direction, install_new=install_new)
     else:
         print("Aborted")
