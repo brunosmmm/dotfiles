@@ -86,7 +86,8 @@ values."
                                       magit-todos
                                       focus
                                       (lsp-focus :location (recipe :fetcher github :repo "emacs-lsp/lsp-focus"))
-                                      ;; dashboard
+                                      ox-hugo
+                                      org-caldav
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -392,6 +393,15 @@ you should place your code here."
   (setq imenu-list-auto-resize nil)
   (setq imenu-list-size 0.3)
 
+  ;; my org agenda files
+  (setq bmorais/agenda-files
+        `(,(concat dotspacemacs-org-directory "personal/agenda.org")
+          ,(concat dotspacemacs-org-directory "personal/ideas.org")
+          ,(concat dotspacemacs-org-directory "neu/neu-agenda.org")
+          ,(concat dotspacemacs-org-directory "neu/esl/4534clock2020.org")
+          ,(concat dotspacemacs-org-directory "oneshot.org")
+          ,(concat dotspacemacs-org-directory "inbox.org")))
+
   ;; org config
   (with-eval-after-load 'org
     (setq org-directory dotspacemacs-org-directory)
@@ -402,6 +412,7 @@ you should place your code here."
     (org-babel-do-load-languages 'org-babel-load-languages
                                  '((plantuml . t) (shell . t) (R . t) (python . t)))
 
+    (setq org-refile-targets '((bmorais/agenda-files :maxlevel . 2)))
     ;; org capture templates stolen from https://blog.jethro.dev/posts/capturing_inbox/ and modified
     (setq org-capture-templates
           `(("i" "inbox" entry (file ,(concat dotspacemacs-org-directory "inbox.org"))
@@ -488,7 +499,13 @@ you should place your code here."
              (:discard (:anything t))
              ))
           ))
-        nil))))
+        nil)))
+    (setq bmorais/org-agenda-family-view
+          `("F" "Family agenda"
+            (
+             (org-ql-block '(and (not (done)) (org-entry-get (point) "family-calendar" 'inherit) (not (property "query-hide" "yes")))
+                            ((org-ql-block-header "Family calendar")))
+              ))))
 
   (defun bmorais/show-agenda ()
     "Show agenda as filtered by org-super-agenda as default."
@@ -526,6 +543,34 @@ you should place your code here."
     "Show all TODOs"
     (interactive) (org-ql-view "All TODOs"))
 
+  (defun bmorais/org-ql-hide-from-query ()
+    "Hide stuff from orq-ql queries based on existence of property 'query-hide'"
+    (not (property "query-hide" "yes")))
+
+  (defun bmorais/sync-family-calendar ()
+    "Sync family calendar."
+    (interactive)
+    (require 'org-caldav)
+    (require 'org-agenda)
+    (setq org-icalendar-timezone "America/New_York")
+    (setq family-calendar `(:calendar-id "9142d845-f017-7a47-82a6-5ba8ca897aec" :files ("~/work/org/personal/agenda.org")
+                                         :url "https://bmorais39.duckdns.org:88/radicale/morais39"
+                                         :select-tags ("familycalendar")
+                                         :skip-conditions ('notdeadline 'notscheduled 'todo 'done)
+                                         :inbox "~/work/org/inbox.org"
+                                         ))
+    (setq bruno-ext-calendar `(:calendar-id "fef30a1a-7984-77bb-9aa3-6c87ab033e7e" :files ("~/work/org/personal/agenda.org")
+                                         :url "http://bmorais39.duckdns.org:88/radicale/morais39"
+                                         :select-tags ("brunoextcalendar")
+                                         :skip-conditions ('notdeadline 'notscheduled 'todo 'done)
+                                         :inbox "~/work/org/inbox.org"
+                                         ))
+    (org-caldav-sync-calendar family-calendar)
+    (org-caldav-sync-calendar bruno-ext-calendar))
+
+  ;; FIXME workaround for recursive load
+  (require 'window-purpose)
+
   ;; overwrite agenda keybindings
   (spacemacs/set-leader-keys "aoa" 'bmorais/show-agenda)
   ;; set some more agenda-related bindings
@@ -538,18 +583,7 @@ you should place your code here."
   (spacemacs/set-leader-keys "aoqc" 'bmorais/show-ql-clocks)
   (spacemacs/set-leader-keys "aoqn" 'bmorais/show-ql-next)
   (spacemacs/set-leader-keys "aoqT" 'bmorais/show-ql-todos)
-
-  (setq bmorais/agenda-files
-        `(,(concat dotspacemacs-org-directory "personal/agenda.org")
-          ,(concat dotspacemacs-org-directory "personal/ideas.org")
-          ,(concat dotspacemacs-org-directory "neu/neu-agenda.org")
-          ,(concat dotspacemacs-org-directory "neu/esl/4534clock2020.org")
-          ,(concat dotspacemacs-org-directory "oneshot.org")
-          ,(concat dotspacemacs-org-directory "inbox.org")))
-
-  (defun bmorais/org-ql-hide-from-query ()
-    "Hide stuff from orq-ql queries based on existence of property 'query-hide'"
-    (not (property "query-hide" "yes")))
+  (spacemacs/set-leader-keys "aoqF" 'bmorais/sync-family-calendar)
 
   ;; setup org-ql views
   (with-eval-after-load 'org-ql
@@ -616,11 +650,12 @@ you should place your code here."
     (require 'org-super-agenda)
     (setq org-agenda-block-separator nil)
     (setq org-agenda-compact-blocks t)
-    (setq org-refile-targets '((bmorais/agenda-files :maxlevel . 2)))
     (add-to-list 'org-agenda-custom-commands `,bmorais/org-agenda-todo-view)
+    (add-to-list 'org-agenda-custom-commands `,bmorais/org-agenda-family-view)
     (org-super-agenda-mode 1)
     (mapcar '(lambda (file) (when (file-exists-p file) (push file org-agenda-files)))
             (org-projectile-todo-files)))
+
 
   ;; auto-format python
   (setq blacken-line-length 79) ;; PEP-8 annoying value
@@ -763,8 +798,6 @@ you should place your code here."
                         :background "#ffb300"
                         :distant-foreground "#ffb300"))
 
-  ;; FIXME workaround for recursive load
-  (require 'window-purpose)
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
