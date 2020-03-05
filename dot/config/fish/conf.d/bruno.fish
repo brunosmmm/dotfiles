@@ -2,6 +2,8 @@
 # configure theme more
 set -g theme_nerd_fonts yes
 set -x VIRTUAL_ENV_DISABLE_PROMPT 1
+
+# set default org file directory
 set -x ORGDIR "$HOME/work/org"
 
 # virtualfish
