@@ -355,8 +355,8 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
   ;; replace default separator due to weird rendering
-  (setq dotspacemacs-mode-line-theme '(all-the-icons :separator slant :separator-scale 1.5))
-  ;; (setq dotspacemacs-mode-line-theme '(doom))
+  ;; (setq dotspacemacs-mode-line-theme '(all-the-icons :separator slant :separator-scale 1.5))
+  (setq dotspacemacs-mode-line-theme '(doom))
   )
 
 (defun dotspacemacs/user-config ()
@@ -546,6 +546,10 @@ you should place your code here."
   (defun bmorais/org-ql-hide-from-query ()
     "Hide stuff from orq-ql queries based on existence of property 'query-hide'"
     (not (property "query-hide" "yes")))
+
+  (defun bmorais/all-org-files ()
+      "Get all org files that are not archived."
+      (directory-files-recursively dotspacemacs-org-directory "^\\(^archived\\)?[^#]+\.org$"))
 
   (defun bmorais/sync-family-calendar ()
     "Sync family calendar."
