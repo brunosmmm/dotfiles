@@ -30,7 +30,7 @@ font pango:DejaVuSansMono Nerd Font 9
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec alacritty
+bindsym $mod+Return exec alacritty -e tmux
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -180,4 +180,5 @@ for_window [class=".*"] border pixel 0
 gaps inner 5
 smart_borders on
 
-exec --no-startup-id nitrogen --restore; sleep 1; picom -b 
+# background image and compositor
+exec --no-startup-id nitrogen --restore; sleep 1; picom -b
