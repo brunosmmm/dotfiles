@@ -10,7 +10,7 @@
         {
             "action": "update",
             "file_ext": ".*",
-            "shell_cmd": "git add ${repo_file}",
+            "shell_cmd": "git -C ${repo_path} add ${repo_file}",
             "name": "auto_add",
             "description": "automatically stage updated files"
         }

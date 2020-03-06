@@ -4,10 +4,12 @@ import os
 import re
 import subprocess
 from typing import Any, Tuple, List, Optional
+from dotutils.git import GitDotfileInspector
 
 
 USER_FILE_SUB_REGEX = re.compile(r"\$\{user_file\}")
 REPO_FILE_SUB_REGEX = re.compile(r"\$\{repo_file\}")
+REPO_PATH_SUB_REGEX = re.compile(r"\$\{repo_path\}")
 DIRECTION_SUB_REGEX = re.compile(r"\$\{direction\}")
 
 DEBUG = os.environ.get("DEBUG")
@@ -144,7 +146,15 @@ def make_shell_post_action(
             """Call shell command."""
             user_file = src if fs_dir == "repo" else dest
             repo_file = src if fs_dir == "home" else dest
+            if fs_dir == "repo":
+                repo_file_dir = os.path.join(*os.path.split(repo_file)[:-1])
+                repo_path = GitDotfileInspector.get_repo_root(repo_file_dir)
+            else:
+                raise RuntimeError(
+                    "home directory is not expected to be a git repository"
+                )
             cmd = re.sub(USER_FILE_SUB_REGEX, user_file, shell_cmd)
+            cmd = re.sub(REPO_PATH_SUB_REGEX, repo_path, cmd)
             cmd = re.sub(REPO_FILE_SUB_REGEX, repo_file, cmd)
             cmd = re.sub(DIRECTION_SUB_REGEX, direction, cmd)
             try:
