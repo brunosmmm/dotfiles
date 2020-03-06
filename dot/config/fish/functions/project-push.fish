@@ -6,7 +6,7 @@ function project-push -a projname -d "Push updated project files."
         return 1
     end
     # push
-    echo "INFO: pushing project $projname from $projdir"
+    echo "INFO: pushing project $projname from $ret"
     # pull
     set ret (git -C $ret push 2> /dev/null)
     if test "$status" != 0
