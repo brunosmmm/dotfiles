@@ -19,8 +19,25 @@ class GitDotfileInspector:
         if not os.path.exists(home_path) or not os.path.isdir(home_path):
             raise OSError("path is invalid or not a directory.")
 
+        if not os.path.isabs(path_to_dotfiles):
+            path_to_dotfiles = os.path.join(os.getcwd(), path_to_dotfiles)
+            self._show_abs_path = False
+        else:
+            self._show_abs_path = True
         self._dot_path = path_to_dotfiles
         self._home_path = home_path
+
+    @staticmethod
+    def get_repo_root(path):
+        """Get repository root."""
+        try:
+            repo_path = subprocess.check_output(
+                ["git", "-C", path, "rev-parse", "--show-toplevel"]
+            )
+        except subprocess.CalledProcessError:
+            raise exceptions.DotfileException("failed to get repository path")
+
+        return repo_path.strip().decode()
 
     def inspect(self):
         """Inspect."""
@@ -30,9 +47,10 @@ class GitDotfileInspector:
                 return s[len(p) :]
 
         file_map = {}
+        repo_path = self.get_repo_root(self._dot_path)
         try:
             git_output = subprocess.check_output(
-                ["git", "ls-files", self._dot_path]
+                ["git", "-C", repo_path, "ls-files", self._dot_path]
             )
         except subprocess.CalledProcessError:
             raise exceptions.DotfileException("failed to list contents.")
@@ -40,6 +58,7 @@ class GitDotfileInspector:
         for fname in git_output.decode().split("\n"):
             if len(fname) < 1:
                 continue
+            fname = os.path.join(repo_path, fname)
             subpath = delete_prefix(fname, self._dot_path).lstrip("/")
             subpath_split = os.path.split(subpath)
             if len(subpath_split[0]) < 1:
