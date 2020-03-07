@@ -508,41 +508,71 @@ you should place your code here."
                             ((org-ql-block-header "Family calendar")))
               ))))
 
+  (defun bmorais/call-and-close-buffers (fn keep-buffer-regex &rest fnargs)
+    "Call a function which opens many buffers, then close them accordingly."
+    (setq buffers-before (buffer-list))
+    (setq retval (apply fn fnargs))
+    (setq new-buffers (-difference (buffer-list) buffers-before))
+    ;; kill buffers
+    (dolist (buffer new-buffers)
+      (if (not (eq keep-buffer-regex nil))
+          (if (eq (string-match keep-buffer-regex (buffer-name buffer)) nil)
+              (kill-buffer buffer))))
+    retval)
+
+  (defun bmorais/org-ql-view-close-buffers (fn &rest args)
+    "Wrap org-ql-view calls and close open buffers."
+    (apply 'bmorais/call-and-close-buffers fn "Org QL View" args)
+    )
+
+  ;; add org-ql-view wrapper
+  ;; NOTE this breaks any functionality provided; if used, buffer can only show information
+  ;; (advice-add 'org-ql-view :around #'bmorais/org-ql-view-close-buffers)
+
   (defun bmorais/show-agenda ()
     "Show agenda as filtered by org-super-agenda as default."
-    (interactive) (org-agenda nil "g"))
+    (interactive)
+    (org-agenda nil "g"))
 
   (defun bmorais/show-ql-soon ()
     "Show org-ql-view."
-    (interactive) (org-ql-view "Overview: Happening soon"))
+    (interactive)
+    (org-ql-view "Overview: Happening soon"))
 
   (defun bmorais/show-ql-today ()
     "Show orq-ql-view for today."
-    (interactive) (org-ql-view "Today's Agenda"))
+    (interactive)
+    (org-ql-view "Today's Agenda"))
 
   (defun bmorais/show-ql-longterm ()
     "Show orq-ql-view for longterm."
-    (interactive) (org-ql-view "Overview: Longterm"))
+    (interactive)
+    (org-ql-view "Overview: Longterm"))
 
   (defun bmorais/show-ql-unsched ()
     "Show unscheduled tasks"
-    (interactive) (org-ql-view "Unscheduled tasks"))
+    (interactive)
+    (org-ql-view "Unscheduled tasks"))
 
   (defun bmorais/show-ql-misc ()
     "Show miscellaneous tasks"
-    (interactive) (org-ql-view "Oneshot tasks"))
+    (interactive)
+    (org-ql-view "Oneshot tasks"))
 
   (defun bmorais/show-ql-clocks ()
     "Show project clocks."
-    (interactive) (org-ql-view "Project clocks"))
+    (interactive)
+    (org-ql-view "Project clocks"))
 
   (defun bmorais/show-ql-next ()
     "Show next / current tasks."
-    (interactive) (org-ql-view "In progress"))
+    (interactive)
+    (org-ql-view "In progress"))
 
   (defun bmorais/show-ql-todos ()
     "Show all TODOs"
-    (interactive) (org-ql-view "All TODOs"))
+    (interactive)
+    (org-ql-view "All TODOs"))
 
   (defun bmorais/org-ql-hide-from-query ()
     "Hide stuff from orq-ql queries based on existence of property 'query-hide'"
@@ -642,7 +672,7 @@ you should place your code here."
        ("In progress" :buffers-files org-agenda-files
         :query (todo "NEXT") :title "In progress"
         :super-groups ((:auto-property "project-name") (:auto-group t)))
-       ("All TODOs" :buffers-files (lambda () (directory-files-recursively dotspacemacs-org-directory "^\\(^archived\\)?[^#]+\.org$"))
+       ("All TODOs" :buffers-files org-agenda-files
         :query (and (todo) (not (done)) (not (property "query-hide" "yes")) (not (org-entry-get (point) "archived" 'inherit))
                     (not (todo "INACTIVE")) (not (todo "REFILE"))) :title "All TODO items"
         :super-groups ((:auto-property "project-name") (:auto-group t) (:auto-category t)))))
@@ -657,10 +687,7 @@ you should place your code here."
     (setq org-agenda-compact-blocks t)
     (add-to-list 'org-agenda-custom-commands `,bmorais/org-agenda-todo-view)
     (add-to-list 'org-agenda-custom-commands `,bmorais/org-agenda-family-view)
-    (org-super-agenda-mode 1)
-    (mapcar '(lambda (file) (when (file-exists-p file) (push file org-agenda-files)))
-            (org-projectile-todo-files)))
-
+    (org-super-agenda-mode 1))
 
   ;; auto-format python
   (setq blacken-line-length 79) ;; PEP-8 annoying value
@@ -848,7 +875,7 @@ This function is called at the very end of Spacemacs initialization."
  '(evil-want-Y-yank-to-eol nil)
  '(nil nil t)
  '(org-agenda-files
-   '("~/work/org/personal/clock.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/oneshot.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/inbox.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/neu/neu-agenda.org" "~/work/org/personal/agenda.org" "/home/bruno/work/org/GlobalTODO.org" "~/work/org/neu/esl/4534clock2020.org" "/home/bruno/work/org/journal/20200306"))
+   '("~/work/org/personal/agenda.org" "~/work/org/personal/ideas.org" "~/work/org/neu/neu-agenda.org" "~/work/org/neu/esl/4534clock2020.org" "~/work/org/oneshot.org" "~/work/org/inbox.org" "~/work/org/lists.org"))
  '(package-selected-packages
    '(graphviz-dot-mode sedona-mode ox-gfm auctex-latexmk magit-popup git-commit with-editor espresso-theme eshell-z eshell-prompt-extras esh-help emmet-mode dracula-theme django-theme disaster darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme csv-mode company-web web-completion-data company-tern dash-functional tern company-statistics company-shell company-ghci company-ghc ghc haskell-mode company-cabal company-c-headers company-auctex company-anaconda company color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode cmm-mode cmake-mode clues-theme clang-format chruby cherry-blossom-theme busybee-theme bundler inf-ruby bubbleberry-theme birds-of-paradise-plus-theme biblio biblio-core badwolf-theme auto-yasnippet yasnippet auctex apropospriate-theme anti-zenburn-theme anaconda-mode pythonic ample-zen-theme ample-theme alect-themes afternoon-theme auto-complete imenu-list ibuffer-projectile slack emojify circe oauth2 websocket jedi-direx direx jedi company-jedi jedi-core python-environment epc ctable concurrent deferred ac-ispell realgud test-simple loc-changes load-relative textx-mode sc-mode org-journal nlinum kivy-mode zenburn-theme zen-and-art-theme yapfify yaml-mode xterm-color white-sand-theme web-mode web-beautify underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme stickyfunc-enhance srefactor spotify spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slim-mode shell-pop seti-theme scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reverse-theme rebecca-theme rbenv rake railscasts-theme pyvenv pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme plantuml-mode planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme orgit organic-green-theme org-ref pdf-tools key-chord ivy tablist org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme multi-term monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minitest minimal-theme material-theme markdown-toc markdown-mode majapahit-theme magit-gitflow magit-gh-pulls madhat2r-theme lush-theme livid-mode skewer-mode simple-httpd live-py-mode light-soap-theme json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc jbeans-theme jazz-theme multi xcscope parsebib gitignore-mode gh marshal logito pcache ht pos-tip flycheck magit ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint evil-unimpaired evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line avy highlight evil goto-chg undo-tree dash helm popup helm-core async ir-black-theme intero insert-shebang inkpot-theme indent-guide hydra hy-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation heroku-theme hemisu-theme helm-themes helm-spotify-plus helm-pydoc helm-projectile helm-mode-manager helm-make helm-hoogle helm-gtags helm-gitignore helm-flx helm-descbinds helm-css-scss helm-cscope helm-company helm-c-yasnippet helm-bibtex helm-ag hc-zenburn-theme haskell-snippets haml-mode gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio gnuplot github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags gandalf-theme fuzzy flycheck-pos-tip flycheck-haskell flx-ido flatui-theme flatland-theme fish-mode fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exotica-theme exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit))
  '(safe-local-variable-values
