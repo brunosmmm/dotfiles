@@ -3,8 +3,9 @@
 set -g theme_nerd_fonts yes
 set -x VIRTUAL_ENV_DISABLE_PROMPT 1
 
-# set default org file directory
-set -x ORGDIR "$HOME/work/org"
+# set default project file
+set -x PROJECTS_FILE "$HOME/.config/projects/projects.json"
+set -x CREDENTIALS_FILE "$HOME/.config/projects/credentials.json"
 
 # virtualfish
 eval (python -m virtualfish auto_activation projects)
