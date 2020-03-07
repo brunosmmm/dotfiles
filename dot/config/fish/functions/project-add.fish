@@ -7,11 +7,11 @@ function project-add -a projname projpath -d "add a project"
         echo "error: missing project path"
         return 1
     end
-    if not set -q projects_file
+    if not set -q PROJECTS_FILE
         echo "error: project file environment variable not set"
         return 1
     end
-    set ret (cat "$projects_file" | jq ".$projname" -r)
+    set ret (cat "$PROJECTS_FILE" | jq ".$projname" -r)
     if test "$status" != 0
         echo "error: internal error"
         return 1
@@ -31,6 +31,6 @@ function project-add -a projname projpath -d "add a project"
     end
     set abspath (realpath "$projpath")
     # finally add
-    set contents (cat "$projects_file" | jq ". |= . +{\"$projname\": \"$abspath\"}" -r)
-    echo "$contents" > "$projects_file"
+    set contents (cat "$PROJECTS_FILE" | jq ". |= . +{\"$projname\": \"$abspath\"}" -r)
+    echo "$contents" > "$PROJECTS_FILE"
 end
