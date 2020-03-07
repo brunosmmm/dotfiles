@@ -1,4 +1,4 @@
-function __bmorais_is_git_repo -a repopath -d "Check whether is a git repository."
+function __project_is_git_repo -a repopath -d "Check whether is a git repository."
     if test -z "$repopath"
         return 0
     end

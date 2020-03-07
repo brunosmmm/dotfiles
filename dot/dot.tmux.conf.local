@@ -285,6 +285,10 @@ set -g mouse on
 set -g status-keys vi
 set -g mode-keys vi
 
+# spacemacs-like
+unbind-key _
+bind-key / split-window -h
+
 # replace C-b by C-a instead of using both prefixes
 # set -gu prefix2
 # unbind C-a

@@ -1,4 +1,4 @@
-function __bmorais_get_project_path -a projname -d "Get project path."
+function __project_get_project_path -a projname -d "Get project path."
     if not set -q PROJECTS_FILE
         return 1
     end

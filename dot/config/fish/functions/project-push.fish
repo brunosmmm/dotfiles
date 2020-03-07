@@ -1,5 +1,5 @@
 function project-push -a projname -d "Push updated project files."
-    set ret (__bmorais_check_project $projname)
+    set ret (__project_check_project $projname)
     set match (echo $ret | string match "^ERROR:.*" -r)
     if not test -z "$match"
         echo $ret

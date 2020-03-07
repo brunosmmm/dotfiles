@@ -1,4 +1,4 @@
-function __bmorais_check_project -a projname
+function __project_check_project -a projname
     if test -z "$projname"
         echo "ERROR: missing project name"
         return 1
@@ -9,13 +9,13 @@ function __bmorais_check_project -a projname
         return 1
     end
     # parse project file and get project dir
-    set projdir (__bmorais_get_project_path "$projname")
+    set projdir (__project_get_project_path "$projname")
     if test "$status" != 0
         echo "ERROR: could not find project named $projname"
         return
     end
     # try to see if it is a git repository
-    set isrepo (__bmorais_is_git_repo "$projdir")
+    set isrepo (__project_is_git_repo "$projdir")
     if test "$isrepo" = 0
         echo "ERROR: not a git repository"
         return
