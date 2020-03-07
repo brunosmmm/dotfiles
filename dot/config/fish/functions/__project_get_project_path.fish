@@ -6,7 +6,7 @@ function __project_get_project_path -a projname -d "Get project path."
     if test -z "$projname"
         return 1
     end
-    set projpath (cat "$PROJECTS_FILE" | jq ".$projname" -r)
+    set projpath (cat "$PROJECTS_FILE" | jq ".\"$projname\"" -r)
     if test "$status" != 0
         #error
         return 1
