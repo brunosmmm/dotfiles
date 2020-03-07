@@ -1,6 +1,6 @@
 function org-save -d "Push updated org files."
-    # project-auto-commit org
-    # project-push org
+    project-auto-commit org
+    project-push org
 
     # get credentials
 
@@ -10,6 +10,6 @@ function org-save -d "Push updated org files."
     set credentials (credentials-get webdav)
     for orgfile in $orgfiles
         # upload directly
-        curl --user "$credentials" -T "$orgpath/$orgfile" 'https://bmorais39.duckdns.org:88/webdav/' --anyauth
+        # curl --user "$credentials" -T "$orgpath/$orgfile" 'https://bmorais39.duckdns.org:88/webdav/' --anyauth
     end
 end
