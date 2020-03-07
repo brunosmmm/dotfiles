@@ -11,7 +11,7 @@ function project-modify -a projname projpath -d "Modify a project"
         echo "error: project file environment variable not set"
         return 1
     end
-    set ret (cat "$PROJECTS_FILE" | jq ".$projname" -r)
+    set ret (cat "$PROJECTS_FILE" | jq ".\"$projname\"" -r)
     if test "$status" != 0
         echo "error: internal error"
         return 1

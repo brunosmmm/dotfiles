@@ -7,7 +7,7 @@ function project-remove -a projname -d "Remove a project"
         echo "ERROR: project file environment variable not set"
         return 1
     end
-    set ret (cat "$PROJECTS_FILE" | jq ".$projname" -r)
+    set ret (cat "$PROJECTS_FILE" | jq ".\"$projname\"" -r)
     if test "$status" != 0
         echo "ERROR: internal error"
         return 1
