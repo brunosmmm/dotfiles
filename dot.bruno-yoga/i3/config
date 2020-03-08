@@ -419,8 +419,8 @@ mode "$mode_gaps_outer" {
 # bmorais
 bindsym $mod+Shift+Next move workspace to output right
 bindsym $mod+Shift+Prior move workspace to output left
-bindsym XF86AudioRaiseVolume exec pulseaudio-ctl up 10
-bindsym XF86AudioLowerVolume exec pulseaudio-ctl down 10
+bindsym XF86AudioRaiseVolume exec pulseaudio-ctl up 5
+bindsym XF86AudioLowerVolume exec pulseaudio-ctl down 5
 focus_on_window_activation urgent
 no_focus [window_role="pop-up"]
 mouse_warping none
