@@ -290,7 +290,7 @@ unbind-key _
 bind-key / split-window -h
 
 # replace C-b by C-a instead of using both prefixes
-# set -gu prefix2
+set -gu prefix2
 # unbind C-a
 # unbind C-b
 # set -g prefix C-a
