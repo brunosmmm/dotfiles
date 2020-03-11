@@ -58,7 +58,8 @@ values."
      ibuffer
      docker
      systemd
-     (lsp :variables lsp-ui-doc-enable nil lsp-signature-auto-activate nil)
+     ;; HACK temporary regression?
+     (lsp :variables lsp-ui-doc-enable nil lsp-signature-auto-activate nil lsp-ui-doc-winum-ignore t lsp-ui-doc--buffer-prefix " *lsp-ui-doc-")
      (plantuml :variables plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar" org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
      (debug :variables debug-additional-debuggers '("ipdb" "pdb" "trepan3k"))
      neotree
