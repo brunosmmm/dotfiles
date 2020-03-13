@@ -67,7 +67,7 @@ values."
      rust
      imenu-list
      (cmake :variables cmake-enable-cmake-ide-support t)
-     (scala :variables scala-backend 'scala-metals)
+     scala
      (deft :variables deft-zetteldeft t)
      slack
    )
@@ -93,7 +93,7 @@ values."
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '(ensime)
+   dotspacemacs-excluded-packages '()
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
    ;; `used-only' installs only explicitly used packages and uninstall any
@@ -181,7 +181,7 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(doom-molokai
+   dotspacemacs-themes '(doom-monokai-classic
                          doom-nord-light)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
