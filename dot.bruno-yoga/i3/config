@@ -62,8 +62,8 @@ bindsym $mod+F3 exec pcmanfm
 # bindsym $mod+F3 exec ranger
 bindsym $mod+Shift+F3 exec gksu pcmanfm
 bindsym $mod+F5 exec terminal -e 'mocp'
-bindsym $mod+t exec --no-startup-id pkill compton
-bindsym $mod+Ctrl+t exec --no-startup-id compton -b
+bindsym $mod+t exec --no-startup-id pkill picom
+bindsym $mod+Ctrl+t exec --no-startup-id picom -b
 bindsym $mod+Shift+d --release exec "killall dunst; exec notify-send 'restart dunst'"
 bindsym Print exec --no-startup-id i3-scrot
 bindsym $mod+Print --release exec --no-startup-id i3-scrot -w
@@ -274,7 +274,7 @@ bindsym $mod+9 exec --no-startup-id betterlockscreen -l dim
 
 # Autostart applications
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-exec --no-startup-id nitrogen --restore; sleep 1; compton -b
+exec --no-startup-id nitrogen --restore; sleep 1; picom -b
 #exec --no-startup-id manjaro-hello
 # exec --no-startup-id nm-applet
 # exec --no-startup-id xfce4-power-manager
@@ -421,6 +421,7 @@ bindsym $mod+Shift+Next move workspace to output right
 bindsym $mod+Shift+Prior move workspace to output left
 bindsym XF86AudioRaiseVolume exec pulseaudio-ctl up 5
 bindsym XF86AudioLowerVolume exec pulseaudio-ctl down 5
+bindsym $mod+c exec xfce4-find-cursor
 focus_on_window_activation urgent
 no_focus [window_role="pop-up"]
 mouse_warping none
