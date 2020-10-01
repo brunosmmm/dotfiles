@@ -62,7 +62,6 @@ values."
      (lsp :variables lsp-ui-doc-enable nil lsp-signature-auto-activate nil lsp-ui-doc-winum-ignore t lsp-ui-doc--buffer-prefix " *lsp-ui-doc-")
      (plantuml :variables plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar" org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
      (debug :variables debug-additional-debuggers '("ipdb" "pdb" "trepan3k"))
-     neotree
      (dap :variables dap-ui-locals-expand-depth 2)
      rust
      imenu-list
@@ -70,6 +69,7 @@ values."
      scala
      (deft :variables deft-zetteldeft t)
      slack
+     treemacs
    )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
