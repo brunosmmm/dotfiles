@@ -14,10 +14,10 @@ class GitDotfileInspector:
         if not os.path.exists(path_to_dotfiles) or not os.path.isdir(
             path_to_dotfiles
         ):
-            raise OSError("path is invalid or not a directory.")
+            raise OSError(f"path is invalid or not a directory: '{path_to_dotfiles}'")
 
         if not os.path.exists(home_path) or not os.path.isdir(home_path):
-            raise OSError("path is invalid or not a directory.")
+            raise OSError(f"path is invalid or not a directory: {home_path}")
 
         if not os.path.isabs(path_to_dotfiles):
             path_to_dotfiles = os.path.join(os.getcwd(), path_to_dotfiles)
