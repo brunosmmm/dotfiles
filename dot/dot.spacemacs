@@ -44,7 +44,7 @@ values."
      github
      (python :variables python-test-runner 'pytest python-backend 'lsp python-formatter 'black python-format-on-save t)
      (c-c++ :variables c-c++-backend 'lsp-ccls c-c++-adopt-subprojects t)
-     latex
+     (latex :variables latex-backend 'lsp)
      bibtex
      markdown
      (org :variables org-enable-github-support t org-projectile-file "/home/bruno/work/org/GlobalTODO.org" org-enable-org-journal-support t org-enable-reveal-js-support t)
