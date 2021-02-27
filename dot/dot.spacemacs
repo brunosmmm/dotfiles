@@ -60,11 +60,10 @@ values."
      docker
      systemd
      ;; HACK temporary regression?
-     (lsp :variables lsp-ui-doc-enable nil lsp-signature-auto-activate nil lsp-ui-doc-winum-ignore t lsp-ui-doc--buffer-prefix " *lsp-ui-doc-")
+     ;; (lsp :variables lsp-ui-doc-enable nil lsp-signature-auto-activate nil lsp-ui-doc-winum-ignore t lsp-ui-doc--buffer-prefix " *lsp-ui-doc-")
+     (lsp :variables lsp-pyls-plugins-jedi-use-pyenv-environment t lsp-signature-auto-activate nil)
      (plantuml :variables plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar" org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
-     (debug :variables debug-additional-debuggers '("ipdb" "pdb" "trepan3k"))
-     (dap :variables dap-ui-locals-expand-depth 2)
-     rust
+     (dap :variables dap-ui-locals-expand-depth 2 dap-python-debugger 'debugpy)
      imenu-list
      (cmake :variables cmake-enable-cmake-ide-support t)
      scala
@@ -362,6 +361,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; replace default separator due to weird rendering
   ;; (setq dotspacemacs-mode-line-theme '(all-the-icons :separator slant :separator-scale 1.5))
   (setq dotspacemacs-mode-line-theme '(doom))
+  (setq comp-deferred-compilation t)
   )
 
 (defun dotspacemacs/user-config ()
@@ -697,18 +697,11 @@ you should place your code here."
   ;; auto-format python
   (setq blacken-line-length 79) ;; PEP-8 annoying value
 
-  (defadvice virtualenv-activate (after virtual-pdb)
-    (custom-set-variables
-     '(gud-pdb-command-name
-       (concat virtualenv-active "/bin/ipdb" ))))
-
-  (ad-activate 'virtualenv-activate)
+  ;; (ad-activate 'virtualenv-activate)
 
   (setq org-confirm-babel-evaluate nil)
 
   (setq neo-theme 'icons)
-  (setq powerline-default-separator 'arrow)
-  ;; (setq powerline-default-separator-dir (quote (right . left)))
 
   ;; configuration for spaceline-all-the-icons
   (if (eq (spacemacs/get-mode-line-theme-name) 'all-the-icons)
@@ -717,6 +710,7 @@ you should place your code here."
         (spaceline-toggle-all-the-icons-buffer-size-off)
         (spaceline-toggle-all-the-icons-time-off)
         (setq spaceline-all-the-icons-separators-invert-direction 1)
+        (setq powerline-default-separator 'arrow)
 
         (spaceline-define-segment all-the-icons-org-clock-current-task
           "An `all-the-icons' segment to display the current org-clock task."
@@ -792,13 +786,6 @@ you should place your code here."
   (setq deft-directory (concat dotspacemacs-org-directory "zettelkasten"))
   (setq deft-recursive t)
 
-  (slack-register-team
-   :name "eece4534-sp20"
-   :token (auth-source-pick-first-password
-           :host "eece4534sprin-3xk4063.slack.com"
-           :user "soutomaiormunizmo.b@husky.neu.edu")
-   :subscribed-channels '((general slackbot)))
-
   (setq read-process-output-max (* 1024 1024))
 
   ;; icons in dired mode
@@ -813,21 +800,6 @@ you should place your code here."
 
   ;; auto-activate magit-todos mode
   (with-eval-after-load 'magit (magit-todos-mode 1))
-
-  ;; (setq dashboard-set-heading-icons t)
-  ;; (setq dashboard-set-file-icons t)
-  ;; (setq show-week-agenda-p t)
-  ;; (setq dashboard-items '((recents  . 8)
-  ;;                         (bookmarks . 8)
-  ;;                         (projects . 8)
-  ;;                         (agenda . 5)))
-
-  ;; (require 'dashboard)
-  ;; (dashboard-insert-startupify-lists)
-  ;; (kill-buffer "*spacemacs*")
-  ;; (switch-to-buffer "*dashboard*")
-  ;; ;; override spacemacs buffer keybinding
-  ;; (spacemacs/set-leader-keys "bh" (lambda () (interactive) (switch-to-buffer "*dashboard*")))
 
   ;; customize org-super-agenda and other org styles
   (with-eval-after-load 'org-ql-view
@@ -869,10 +841,6 @@ This function is called at the very end of Spacemacs initialization."
    '("~/work/org/personal/agenda.org" "~/work/org/personal/ideas.org" "~/work/org/neu/neu-agenda.org" "~/work/org/neu/esl/4534clock2020.org" "~/work/org/oneshot.org" "~/work/org/inbox.org" "~/work/org/neu/esl/acc_coupling/planning.org"))
  '(package-selected-packages
    '(doom-monokai-classic-theme yapfify yaml-mode xterm-color xcscope ws-butler winum which-key wgrep web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toml-mode toc-org textx-mode tagedit systemd spotify spaceline solaire-mode smex smeargle slim-mode slack shell-pop scss-mode scala-mode sbt-mode sass-mode restart-emacs rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode popwin plantuml-mode pip-requirements persp-mode paradox ox-reveal ox-hugo ox-gfm orgit org-ref org-projectile org-present org-pomodoro org-mime org-download org-caldav org-bullets open-junk-file noflet neotree multi-term move-text markdown-toc magit-todos magit-gitflow magit-gh-pulls macrostep lsp-focus lorem-ipsum livid-mode live-py-mode linum-relative link-hint js2-refactor js-doc ivy-hydra insert-shebang indent-guide imenu-list ibuffer-projectile hy-mode hungry-delete highlight-parentheses highlight-numbers highlight-indentation helm-make google-translate golden-ratio gnuplot gitignore-mode github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags fuzzy flyspell-correct-ivy flycheck-rust flycheck-pos-tip flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump doom-themes dockerfile-mode docker disaster diminish deft define-word cython-mode counsel-projectile company-web company-statistics company-shell company-c-headers company-auctex company-anaconda column-enforce-mode coffee-mode cmake-mode clean-aindent-mode clang-format cargo bitbake auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons-ivy-rich all-the-icons-dired aggressive-indent adaptive-wrap ace-window ace-link ac-ispell))
- '(safe-local-variable-values
-   '((eval dap-register-debug-template "Debug sdc"
-           (list :type "python" :request "launch" :args "-v debug/join.hr compile" :name "Run Configuration"))
-     (javascript-backend . lsp)))
  '(verilog-auto-newline nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -881,16 +849,3 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  )
 )
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(doom-monokai-classic-theme yapfify yaml-mode xterm-color xcscope ws-butler winum which-key wgrep web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toml-mode toc-org textx-mode tagedit systemd spotify spaceline solaire-mode smex smeargle slim-mode slack shell-pop scss-mode scala-mode sbt-mode sass-mode restart-emacs rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode popwin plantuml-mode pip-requirements persp-mode paradox ox-reveal ox-hugo ox-gfm orgit org-ref org-projectile org-present org-pomodoro org-mime org-download org-caldav org-bullets open-junk-file noflet neotree multi-term move-text markdown-toc magit-todos magit-gitflow magit-gh-pulls macrostep lsp-focus lorem-ipsum livid-mode live-py-mode linum-relative link-hint js2-refactor js-doc ivy-hydra insert-shebang indent-guide imenu-list ibuffer-projectile hy-mode hungry-delete highlight-parentheses highlight-numbers highlight-indentation helm-make google-translate golden-ratio gnuplot gitignore-mode github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags fuzzy flyspell-correct-ivy flycheck-rust flycheck-pos-tip flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump doom-themes dockerfile-mode docker disaster diminish deft define-word cython-mode counsel-projectile company-web company-statistics company-shell company-c-headers company-auctex company-anaconda column-enforce-mode coffee-mode cmake-mode clean-aindent-mode clang-format cargo bitbake auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons-ivy-rich all-the-icons-dired aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
