@@ -172,15 +172,15 @@ bar {
   colors {
     background #00000000
     }
-	status_command python3 ~/.local/bumblebee-status/bumblebee-status -m spotify cpu memory pasink pasource time date -p time.format="%H:%M" -t gruvbox-powerline-light
+	status_command bumblebee-status -m spotify cpu memory pasink pasource time date -p time.format="%H:%M" -t gruvbox-powerline-light
 
 }
 # start networkmanager applet
-exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+# exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 for_window [class=".*"] border pixel 0
 gaps inner 5
 smart_borders on
 
 # background image and compositor
 exec --no-startup-id nitrogen --restore; sleep 1; picom -b
-exec --no-startup-id sleep 3; xfce4-power-manager
+# exec --no-startup-id sleep 3; xfce4-power-manager
