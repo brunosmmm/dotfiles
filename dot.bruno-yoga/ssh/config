@@ -3,6 +3,10 @@ Host localhost
      StrictHostKeyChecking no
      UserKnownHostsFile = /dev/null
 
+Host 10.42.1.1
+     StrictHostKeyChecking no
+     UserKnownHostsFile = /dev/null
+
 Host gateway.coe.neu.edu
 	ControlMaster auto
 	ControlPath ~/.ssh/%r@%h:%p

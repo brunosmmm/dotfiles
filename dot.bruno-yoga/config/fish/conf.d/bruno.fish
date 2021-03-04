@@ -8,8 +8,6 @@ set -x PROJECTS_FILE "$HOME/.config/projects/projects.json"
 set -x CREDENTIALS_FILE "$HOME/.config/projects/credentials.json"
 set -x BOOKMARKS_FILE "$HOME/.config/bookmarks/bookmarks.json"
 
-# virtualfish
-eval (python -m virtualfish auto_activation projects)
 
 # paths
 # set -x GOPATH /home/bruno/.go
