@@ -821,6 +821,9 @@ you should place your code here."
                         :background "#ffb300"
                         :distant-foreground "#ffb300"))
 
+  (require 'auth-source-pass)
+  (auth-source-pass-enable)
+
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.

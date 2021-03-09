@@ -1,26 +1,26 @@
 
 global:
   fish
-  terminator
+  alacritty
   emacs
-  peco
   the_silver_searcher
   bat
   exa
   brave
   fd
+  pass
 
 editor:
   spacemacs
   adobe-source-code-pro-fonts
   python-language-server
+  texlab
+  ccls
 
 X11:
   i3
   polybar
-  lxrandr
   rofi
-  onboard
   betterlockscreen
 
 utils:
@@ -28,6 +28,10 @@ utils:
 
 media:
   spotify
-  clementine
+  strawberry
   playerctl
   vlc
+
+laptops:
+  onboard
+  lxrandr

@@ -183,4 +183,5 @@ smart_borders on
 
 # background image and compositor
 exec --no-startup-id nitrogen --restore; sleep 1; picom -b
+exec --no-startup-id xset s off -dpms
 # exec --no-startup-id sleep 3; xfce4-power-manager
