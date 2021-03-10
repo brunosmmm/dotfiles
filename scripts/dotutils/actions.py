@@ -53,16 +53,17 @@ def inspect(dot_path, home_path, fname, diff=False, direction="repo"):
     try:
         _diff = ins.diff_file(fname, direction)
     except DotFileNotMonitoredError:
-        print(f"ERROR: file {fname} is not monitored")
-        return None
+        return {
+            "status": "err",
+            "err": f"ERROR: file {fname} is not monitored",
+        }
     except OSError as ex:
-        print(f"ERROR: {ex}")
-        return None
+        return {"status": "err", "err": f"ERROR: {ex}"}
 
     if diff and _diff is not None:
-        return _diff
+        return {"status": "okay", "diff": _diff}
     elif diff is False:
-        return _diff is not None
+        return {"status": "okay", "result": _diff is not None}
 
 
 def update(

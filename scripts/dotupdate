@@ -49,6 +49,9 @@ if __name__ == "__main__":
     inspect_parser.add_argument(
         "--diff", action="store_true", help="show diff"
     )
+    inspect_parser.add_argument(
+        "-s", help="machine readable output", action="store_true"
+    )
     update_parser = subparsers.add_parser(
         "update", help="update dotfiles from home directory"
     )
@@ -118,13 +121,26 @@ if __name__ == "__main__":
         )
     elif args.cmd == "inspect":
         ret = inspect(args.p, args.home, args.fname, args.diff)
-        if isinstance(ret, bool):
-            if ret:
-                print("File has been modified")
+        if ret["status"] == "err":
+            if args.s:
+                print("error")
             else:
-                print("File has not been modified")
-        elif ret is None:
-            # error
+                print(ret["err"])
             exit(1)
-        else:
-            print(ret)
+        elif ret["status"] == "okay":
+            if "diff" in ret:
+                if args.s:
+                    exit(0)
+                print(ret["diff"])
+                exit(0)
+            if "result" in ret:
+                if ret["result"]:
+                    if args.s:
+                        print("modified")
+                    else:
+                        print("File has been modified")
+                else:
+                    if args.s:
+                        print("unmodified")
+                    else:
+                        print("File has not been modified")
