@@ -123,5 +123,8 @@ if __name__ == "__main__":
                 print("File has been modified")
             else:
                 print("File has not been modified")
+        elif ret is None:
+            # error
+            exit(1)
         else:
             print(ret)

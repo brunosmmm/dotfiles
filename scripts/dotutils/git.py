@@ -6,6 +6,10 @@ from . import exceptions
 from .misc import files_differ, git_diff
 
 
+class DotFileNotMonitoredError(Exception):
+    """Dotfile not monitored."""
+
+
 class GitDotfileInspector:
     """Inspect git repository for dotfiles."""
 
@@ -14,7 +18,9 @@ class GitDotfileInspector:
         if not os.path.exists(path_to_dotfiles) or not os.path.isdir(
             path_to_dotfiles
         ):
-            raise OSError(f"path is invalid or not a directory: '{path_to_dotfiles}'")
+            raise OSError(
+                f"path is invalid or not a directory: '{path_to_dotfiles}'"
+            )
 
         if not os.path.exists(home_path) or not os.path.isdir(home_path):
             raise OSError(f"path is invalid or not a directory: {home_path}")
@@ -133,9 +139,11 @@ class GitDotfileInspector:
 
         if found is False:
             if not os.path.exists(fname):
-                raise RuntimeError(f"file does not exist: '{fname}'")
+                raise OSError(f"file does not exist: '{fname}'")
             else:
-                raise RuntimeError(f"file is not monitored: '{fname}'")
+                raise DotFileNotMonitoredError(
+                    f"file is not monitored: '{fname}'"
+                )
 
         if files_differ(dot_fname, file_map[dot_fname]):
             if direction == "home":

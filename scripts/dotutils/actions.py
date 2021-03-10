@@ -2,7 +2,7 @@
 
 import os
 import shutil
-from dotutils.git import GitDotfileInspector
+from dotutils.git import GitDotfileInspector, DotFileNotMonitoredError
 from dotutils.postactions import POST_ACTION_MGR, PostActionMgr
 
 
@@ -52,8 +52,12 @@ def inspect(dot_path, home_path, fname, diff=False, direction="repo"):
     ins = GitDotfileInspector(dot_path, home_path)
     try:
         _diff = ins.diff_file(fname, direction)
-    except Exception:
-        raise
+    except DotFileNotMonitoredError:
+        print(f"ERROR: file {fname} is not monitored")
+        return None
+    except OSError as ex:
+        print(f"ERROR: {ex}")
+        return None
 
     if diff and _diff is not None:
         return _diff
