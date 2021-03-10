@@ -47,11 +47,11 @@ def update_all(changes, direction, install_new=False):
             print(f"WARNING: postaction '{name}' failed for file '{fname}'")
 
 
-def inspect(dot_path, home_path, fname, diff=False):
+def inspect(dot_path, home_path, fname, diff=False, direction="repo"):
     """Inspect a file and return diff."""
     ins = GitDotfileInspector(dot_path, home_path)
     try:
-        _diff = ins.diff_file(fname)
+        _diff = ins.diff_file(fname, direction)
     except Exception:
         raise
 
