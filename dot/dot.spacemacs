@@ -74,6 +74,8 @@ values."
      multiple-cursors
      (json :variables json-fmt-on-save t)
      meson
+     helpful
+     (unicode-fonts :variables unicode-fonts-enable-ligatures t)
    )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
