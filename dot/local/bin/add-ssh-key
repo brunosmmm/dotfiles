@@ -1,0 +1,8 @@
+#!/usr/bin/expect -f
+set keyloc [lindex $argv 0]
+set passname [lindex $argv 1]
+set pass [exec pass show $passname]
+spawn keychain -q $keyloc
+expect "Enter passphrase for $keyloc:"
+send $pass\n;
+interact
