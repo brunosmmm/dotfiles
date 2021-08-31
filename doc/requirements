@@ -12,26 +12,25 @@ global:
 
 editor:
   spacemacs
-  adobe-source-code-pro-fonts
+  Iosevka Nerd Fonts
   python-language-server
   texlab
   ccls
 
 X11:
   i3
-  polybar
   rofi
   betterlockscreen
 
+wayland:
+  sway
+  waybar
+
 utils:
-  xournal
+  xournalpp
 
 media:
   spotify
   strawberry
   playerctl
   vlc
-
-laptops:
-  onboard
-  lxrandr
