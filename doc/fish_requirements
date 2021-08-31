@@ -1,13 +1,6 @@
 omf:
   cd
-  emacs
   fasd
   foreign-env
   pisces
-  peco
-  fish-spec
   bobthefish
-fisherman:
-  ssh-agent
-  docker-completion
-
