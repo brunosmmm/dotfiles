@@ -32,7 +32,7 @@ values."
    dotspacemacs-configuration-layers
    '(octave
      rust
-     (ivy :variables ivy-enable-advanced-buffer-information t)
+     (ivy :variables ivy-enable-advanced-buffer-information t ivy-enable-icons t)
      ;; helm
      ess
      emacs-lisp
@@ -73,6 +73,7 @@ values."
      treemacs
      multiple-cursors
      (json :variables json-fmt-on-save t)
+     meson
    )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -82,9 +83,7 @@ values."
                                       ;; (sedona-mode :location
                                       ;;              (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
                                       all-the-icons-dired
-                                      all-the-icons-ivy-rich
                                       bitbake
-                                      solaire-mode
                                       doom-themes
                                       (textx-mode :location (recipe :fetcher github :repo "novakboskov/textx-mode"))
                                       focus
@@ -94,6 +93,10 @@ values."
                                       org-ql
                                       highlight-indent-guides
                                       bufler
+                                      (nerd-fonts :location (recipe :fetcher github :repo "mohkale/nerd-fonts.el"))
+                                      tree-sitter
+                                      tree-sitter-langs
+                                      dogears
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -193,7 +196,7 @@ values."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Iosevka"
-                               :size 13
+                               :size 26
                                :weight normal
                                :width normal
                                :powerline-scale 1.0)
@@ -753,14 +756,6 @@ you should place your code here."
 
   (require 'dap-lldb)
 
-  (use-package solaire-mode
-    :hook
-    ((change-major-mode after-revert ediff-prepare-buffer) . turn-on-solaire-mode)
-    (minibuffer-setup . solaire-mode-in-minibuffer)
-    :config
-    (solaire-global-mode +1)
-    (solaire-mode-swap-bg))
-
   (doom-themes-org-config)
   (doom-themes-neotree-config)
   ;; (customize-set-variable 'helm-ff-lynx-style-map t)
@@ -795,9 +790,6 @@ you should place your code here."
   ;; icons in dired mode
   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
 
-  ;; icons for ivy
-  (all-the-icons-ivy-rich-mode 1)
-
   ;; save automatically on clock in/out
   (add-hook 'org-clock-in-hook #'save-buffer)
   (add-hook 'org-clock-out-hook #'save-buffer)
@@ -821,7 +813,19 @@ you should place your code here."
 
   (require 'auth-source-pass)
   (auth-source-pass-enable)
+  (defvar +icons-prefer-nerd-font t)
 
+  (require 'tree-sitter)
+  (require 'tree-sitter-langs)
+  (global-tree-sitter-mode)
+
+  ;; dogears
+  (dogears-mode 1)
+  (spacemacs/set-leader-keys "bgl" 'dogears-list)
+  (spacemacs/set-leader-keys "bgb" 'dogears-back)
+  (spacemacs/set-leader-keys "bgf" 'dogears-forward)
+  (spacemacs/set-leader-keys "bgr" 'dogears-remember)
+  (spacemacs/set-leader-keys "bgg" 'dogears-go)
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.

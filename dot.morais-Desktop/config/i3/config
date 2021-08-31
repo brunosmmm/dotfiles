@@ -195,3 +195,6 @@ exec --no-startup-id xset s off -dpms
 
 # show power-menu
 bindsym $mod+0 exec power-menu
+
+# show rofi in find window mode
+bindsym $mod+Shift+d exec rofi -show window
