@@ -198,7 +198,7 @@ values."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Iosevka"
-                               :size 26
+                               :size 16
                                :weight normal
                                :width normal
                                :powerline-scale 1.0)
@@ -763,8 +763,8 @@ you should place your code here."
   ;; (customize-set-variable 'helm-ff-lynx-style-map t)
 
   ;; transparency
-  (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
-  (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
+  ;; (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
+  ;; (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
 
   ;; lsp stuff
   (setq lsp-file-watch-threshold 2000)
