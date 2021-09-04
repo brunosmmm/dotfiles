@@ -43,7 +43,7 @@ values."
      (auto-completion :variables auto-completion-use-company-box t)
      (git :variables git-enable-magit-todos-plugin t)
      github
-     (python :variables python-test-runner 'pytest python-backend 'lsp python-formatter 'black python-format-on-save t)
+     (python :variables python-test-runner 'pytest python-backend 'lsp python-lsp-server 'pylsp python-formatter 'black python-format-on-save t python-poetry-activate t)
      ipython-notebook
      (c-c++ :variables c-c++-backend 'lsp-ccls c-c++-adopt-subprojects t)
      (latex :variables latex-backend 'lsp)
@@ -381,6 +381,7 @@ explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
   (setq dotspacemacs-org-directory "~/work/org/")
+  (add-to-list 'exec-path "~/.local/bin/")
 
   ;;c++: do not indent inside namespaces
   (c-set-offset 'innamespace 0)
