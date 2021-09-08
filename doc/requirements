@@ -9,11 +9,13 @@ global:
   brave
   fd
   pass
+  expect
+  keychain
 
 editor:
   spacemacs
   Iosevka Nerd Fonts
-  python-language-server
+  python-lsp-server
   texlab
   ccls
 
@@ -25,6 +27,7 @@ X11:
 wayland:
   sway
   waybar
+  mako
 
 utils:
   xournalpp
