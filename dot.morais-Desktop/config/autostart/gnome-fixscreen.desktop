@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Exec=/opt/scripts/gnome-fixscreen.sh
+X-GNOME-Autostart-enabled=true
+Name=fixscreen
+Comment=Fix screen layout under gnome
