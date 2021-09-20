@@ -17,7 +17,7 @@ set $mod Mod4
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-font pango:DejaVuSansMono Nerd Font 9
+font pango:FantasqueSansMono Nerd Font 10
 
 # Before i3 v4.8, we used to recommend this one as the default:
 # font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
@@ -169,14 +169,28 @@ bindsym $mod+XF86Launch5 exec --no-startup-id playerctl play-pause
 bindsym $mod+XF86Launch6 exec --no-startup-id playerctl next
 bindsym $mod+XF86Tools exec --no-startup-id playerctl previous
 
+client.focused          #404040 #404040 #FFB300 #FDF6E3
+client.focused_inactive #252525 #252525 #CC8F00 #454948
+client.unfocused        #252525 #252525 #CC8F00 #454948
+client.urgent           #CB4B16 #FDF6E3 #CC8F00 #268BD2
+client.placeholder      #000000 #0c0c0c #ffffff #000000
+
+client.background       #2B2C2B
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
-
   colors {
-    background #00000000
-    }
-	status_command bumblebee-status -m spotify cpu memory pasink pasource time date -p time.format="%H:%M" -t gruvbox-powerline-light
+        background #101010
+        statusline #F9FAF9
+        separator  #454947
+
+        focused_workspace  #F9FAF9 #262939 #FFFFFF
+        active_workspace   #595B5B #353836 #FDF6E3
+        inactive_workspace #595B5B #222D31 #EEE8D5
+        binding_mode       #16a085 #2C2C2C #F9FAF9
+        urgent_workspace   #16a085 #FDF6E3 #E5201D
+  }
+	status_command bumblebee-status -m spotify cpu memory pasink pasource time date -p time.format="%H:%M" -t iceberg-dp-mod
 
 }
 # start networkmanager applet
@@ -198,3 +212,4 @@ bindsym $mod+0 exec power-menu
 
 # show rofi in find window mode
 bindsym $mod+Shift+d exec rofi -show window
+exec --no-startup-id dunst

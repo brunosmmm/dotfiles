@@ -10,7 +10,7 @@ XTerm*background:        #222D31
 XTerm*foreground:        #d8d8d8
 XTerm*pointerColor:      #1ABB9B
 XTerm*faceName:          DejaVuSansMono Nerd Font
-XTerm*faceSize:          11
+XTerm*faceSize:          12
 XTerm*reverseVideo:      on
 XTerm*selectToClipboard: true
 
@@ -55,7 +55,7 @@ XTerm*selectToClipboard: true
 *color15:                         #f8f8f8
 
 Xcursor.theme: xcursor-breeze
-Xcursor.size:                     0
+Xcursor.size:                     48
 
 URxvt*font:                       xft:DejaVuSansMono Nerd Font:size=11
 
