@@ -14,6 +14,9 @@ function neu-vpn-connect -d "Connecto to NEU VPN"
         end
     end
     set --local credentials (credentials-get "neu")
+    if test $credentials = ""
+        # error
+    end
     set --local _credentials (string split --max 1 ':' "$credentials")
     echo "$_credentials[2]" | sudo openconnect -q -b --pid-file="$vpn_pidfile" --protocol=gp --non-inter --user="$_credentials[1]" --passwd-on-stdin vpn.northeastern.edu
 end
