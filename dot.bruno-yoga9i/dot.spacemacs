@@ -99,6 +99,7 @@ values."
                                       tree-sitter
                                       tree-sitter-langs
                                       dogears
+                                      org-static-blog
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -853,6 +854,31 @@ This function is called at the very end of Spacemacs initialization."
    '("~/work/org/personal/agenda.org" "~/work/org/personal/ideas.org" "~/work/org/neu/neu-agenda.org" "~/work/org/neu/esl/4534clock2020.org" "~/work/org/oneshot.org" "~/work/org/inbox.org" "~/work/org/neu/esl/acc_coupling/planning.org" "~/work/org/neu/esl/ilpform/planning.org"))
  '(package-selected-packages
    '(ron-mode helm-gtags rust-mode doom-monokai-classic-theme yapfify yaml-mode xterm-color xcscope ws-butler winum which-key wgrep web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toml-mode toc-org textx-mode tagedit systemd spotify spaceline solaire-mode smex smeargle slim-mode slack shell-pop scss-mode scala-mode sbt-mode sass-mode restart-emacs rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode popwin plantuml-mode pip-requirements persp-mode paradox ox-reveal ox-hugo ox-gfm orgit org-ref org-projectile org-present org-pomodoro org-mime org-download org-caldav org-bullets open-junk-file noflet neotree multi-term move-text markdown-toc magit-todos magit-gitflow magit-gh-pulls macrostep lsp-focus lorem-ipsum livid-mode live-py-mode linum-relative link-hint js2-refactor js-doc ivy-hydra insert-shebang indent-guide imenu-list ibuffer-projectile hy-mode hungry-delete highlight-parentheses highlight-numbers highlight-indentation helm-make google-translate golden-ratio gnuplot gitignore-mode github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags fuzzy flyspell-correct-ivy flycheck-rust flycheck-pos-tip flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump doom-themes dockerfile-mode docker disaster diminish deft define-word cython-mode counsel-projectile company-web company-statistics company-shell company-c-headers company-auctex company-anaconda column-enforce-mode coffee-mode cmake-mode clean-aindent-mode clang-format cargo bitbake auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons-ivy-rich all-the-icons-dired aggressive-indent adaptive-wrap ace-window ace-link ac-ispell))
+ '(safe-local-variable-values
+   '((setq org-static-blog-index-front-matter "<h1> Welcome to my blog </h1>
+")
+     (org-static-blog-page-postamble . "<div id=\"archive\">
+  <a href=\"https://brunosmmm.github.io/archive.html\">Other posts</a>
+</div>
+<center><a rel=\"license\" href=\"https://creativecommons.org/licenses/by-sa/3.0/\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by-sa/3.0/88x31.png\" /></a><br /><span xmlns:dct=\"https://purl.org/dc/terms/\" href=\"https://purl.org/dc/dcmitype/Text\" property=\"dct:title\" rel=\"dct:type\">bastibe.de</span> by <a xmlns:cc=\"https://creativecommons.org/ns#\" href=\"https://bastibe.de\" property=\"cc:attributionName\" rel=\"cc:attributionURL\">Bastian Bechtold</a> is licensed under a <a rel=\"license\" href=\"https://creativecommons.org/licenses/by-sa/3.0/\">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.</center>")
+     (org-static-blog-page-preamble . "<div class=\"header\">
+  <a href=\"https://brunosmmm.github.io\">My Static Org Blog</a>
+</div>")
+     (org-static-blog-page-header . "<meta name=\"author\" content=\"Bruno Morais\">
+<meta name=\"referrer\" content=\"no-referrer\">
+<link href= \"static/style.css\" rel=\"stylesheet\" type=\"text/css\" />
+<link rel=\"icon\" href=\"static/favicon.ico\">")
+     (org-export-with-section-numbers)
+     (org-export-with-toc)
+     (org-static-blog-enable-tags . t)
+     (org-static-blog-drafts-directory . "~/work/org/web/drafts/")
+     (org-static-blog-posts-directory . "~/work/org/web/posts/")
+     (org-static-blog-publish-directory . "~/work/org/web/")
+     (org-static-blog-publish-url . "https://brunosmmm.github.io/")
+     (org-static-blog-publish-title . "My Static Org Blog")
+     (javascript-backend . tide)
+     (javascript-backend . tern)
+     (javascript-backend . lsp)))
  '(verilog-auto-newline nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

@@ -264,3 +264,4 @@ bar {
 
 exec mako
 output DP-3 scale 2
+output DP-4 scale 2
