@@ -623,6 +623,7 @@ you should place your code here."
   ;; overwrite agenda keybindings
   (spacemacs/set-leader-keys "aoa" 'bmorais/show-agenda)
   ;; set some more agenda-related bindings
+  (spacemacs/declare-prefix "aoq" "bmorais-org-ql")
   (spacemacs/set-leader-keys "aoqs" 'bmorais/show-ql-soon)
   (spacemacs/set-leader-keys "aoqt" 'bmorais/show-ql-today)
   (spacemacs/set-leader-keys "aoql" 'bmorais/show-ql-longterm)
@@ -824,6 +825,7 @@ you should place your code here."
 
   ;; dogears
   (dogears-mode 1)
+  (spacemacs/declare-prefix "bg" "dogears")
   (spacemacs/set-leader-keys "bgl" 'dogears-list)
   (spacemacs/set-leader-keys "bgb" 'dogears-back)
   (spacemacs/set-leader-keys "bgf" 'dogears-forward)
@@ -844,6 +846,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("a8c210aa94c4eae642a34aaf1c5c0552855dfca2153fa6dd23f3031ce19453d4" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "11e57648ab04915568e558b77541d0e94e69d09c9c54c06075938b6abc0189d8" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default))
+ '(doc-view-resolution 600)
  '(ein:output-area-inlined-images t)
  '(evil-want-Y-yank-to-eol nil)
  '(highlight-indent-guides-method 'bitmap)

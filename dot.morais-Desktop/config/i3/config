@@ -209,7 +209,10 @@ exec --no-startup-id xset s off -dpms
 
 # show power-menu
 bindsym $mod+0 exec power-menu
+for_window [instance="origin.exe"] floating enable
+for_window [instance="originthinsetupinternal.exe"] floating enable
 
 # show rofi in find window mode
 bindsym $mod+Shift+d exec rofi -show window
 exec --no-startup-id dunst
+
