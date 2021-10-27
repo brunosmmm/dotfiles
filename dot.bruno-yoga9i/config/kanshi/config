@@ -1,7 +1,7 @@
 profile {
         output eDP-1 disable
-        output "Dell Inc. DELL S2721QS BQC3M43" mode 2560x1440 position 1920,0 scale 1.25
         output "Dell Inc. DELL U2414H R9F1P4123PEL" mode 1920x1080 position 0,0
+        output "Dell Inc. DELL S2721QS BQC3M43" mode 2560x1440 position 1920,0 scale 1.25
 }
 
 profile {
@@ -11,4 +11,9 @@ profile {
 profile {
         output eDP-1 enable scale 2
         output "Dell Inc. DELL S2721QS BQC3M43" mode 3840x2160 position 1920,0 scale 2
+}
+
+profile {
+        output "Dell Inc. DELL U2412M M2GCR2380E7L" mode 1920x1200 position 0,0
+        output eDP-1 enable position 1920,0 scale 2
 }
