@@ -99,6 +99,7 @@ values."
                                       tree-sitter
                                       tree-sitter-langs
                                       dogears
+                                      solaire-mode
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -831,6 +832,9 @@ you should place your code here."
   (spacemacs/set-leader-keys "bgf" 'dogears-forward)
   (spacemacs/set-leader-keys "bgr" 'dogears-remember)
   (spacemacs/set-leader-keys "bgg" 'dogears-go)
+
+  (lsp-register-custom-settings '(("latex.rootDirectory" ".")))
+  (solaire-global-mode +1)
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
