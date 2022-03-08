@@ -82,12 +82,13 @@ values."
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(
-                                      ;; (sedona-mode :location
-                                      ;;              (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
+                                      (sedona-mode :location
+                                                   (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
+                                      font-lock-studio
                                       all-the-icons-dired
                                       bitbake
                                       doom-themes
-                                      (textx-mode :location (recipe :fetcher github :repo "novakboskov/textx-mode"))
+                                      (textx-mode :location (recipe :fetcher github :repo "brunosmmm/textx-mode" :branch "fix-imenu"))
                                       focus
                                       (lsp-focus :location (recipe :fetcher github :repo "emacs-lsp/lsp-focus"))
                                       ox-hugo
@@ -370,7 +371,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; (setq dotspacemacs-mode-line-theme '(all-the-icons :separator slant :separator-scale 1.5))
   (setq dotspacemacs-mode-line-theme '(doom))
   (setq comp-deferred-compilation t)
-  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+  ;; (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
   )
 
 (defun dotspacemacs/user-config ()
@@ -859,7 +860,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-agenda-files
    '("~/work/org/personal/agenda.org" "~/work/org/personal/ideas.org" "~/work/org/neu/neu-agenda.org" "~/work/org/neu/esl/4534clock2020.org" "~/work/org/oneshot.org" "~/work/org/inbox.org" "~/work/org/neu/esl/acc_coupling/planning.org" "~/work/org/neu/esl/ilpform/planning.org"))
  '(package-selected-packages
-   '(ron-mode helm-gtags rust-mode doom-monokai-classic-theme yapfify yaml-mode xterm-color xcscope ws-butler winum which-key wgrep web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toml-mode toc-org textx-mode tagedit systemd spotify spaceline solaire-mode smex smeargle slim-mode slack shell-pop scss-mode scala-mode sbt-mode sass-mode restart-emacs rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode popwin plantuml-mode pip-requirements persp-mode paradox ox-reveal ox-hugo ox-gfm orgit org-ref org-projectile org-present org-pomodoro org-mime org-download org-caldav org-bullets open-junk-file noflet neotree multi-term move-text markdown-toc magit-todos magit-gitflow magit-gh-pulls macrostep lsp-focus lorem-ipsum livid-mode live-py-mode linum-relative link-hint js2-refactor js-doc ivy-hydra insert-shebang indent-guide imenu-list ibuffer-projectile hy-mode hungry-delete highlight-parentheses highlight-numbers highlight-indentation helm-make google-translate golden-ratio gnuplot gitignore-mode github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags fuzzy flyspell-correct-ivy flycheck-rust flycheck-pos-tip flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump doom-themes dockerfile-mode docker disaster diminish deft define-word cython-mode counsel-projectile company-web company-statistics company-shell company-c-headers company-auctex company-anaconda column-enforce-mode coffee-mode cmake-mode clean-aindent-mode clang-format cargo bitbake auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons-ivy-rich all-the-icons-dired aggressive-indent adaptive-wrap ace-window ace-link ac-ispell))
+   '(sedona-mode ron-mode helm-gtags rust-mode doom-monokai-classic-theme yapfify yaml-mode xterm-color xcscope ws-butler winum which-key wgrep web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toml-mode toc-org textx-mode tagedit systemd spotify spaceline solaire-mode smex smeargle slim-mode slack shell-pop scss-mode scala-mode sbt-mode sass-mode restart-emacs rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode popwin plantuml-mode pip-requirements persp-mode paradox ox-reveal ox-hugo ox-gfm orgit org-ref org-projectile org-present org-pomodoro org-mime org-download org-caldav org-bullets open-junk-file noflet neotree multi-term move-text markdown-toc magit-todos magit-gitflow magit-gh-pulls macrostep lsp-focus lorem-ipsum livid-mode live-py-mode linum-relative link-hint js2-refactor js-doc ivy-hydra insert-shebang indent-guide imenu-list ibuffer-projectile hy-mode hungry-delete highlight-parentheses highlight-numbers highlight-indentation helm-make google-translate golden-ratio gnuplot gitignore-mode github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags fuzzy flyspell-correct-ivy flycheck-rust flycheck-pos-tip flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump doom-themes dockerfile-mode docker disaster diminish deft define-word cython-mode counsel-projectile company-web company-statistics company-shell company-c-headers company-auctex company-anaconda column-enforce-mode coffee-mode cmake-mode clean-aindent-mode clang-format cargo bitbake auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons-ivy-rich all-the-icons-dired aggressive-indent adaptive-wrap ace-window ace-link ac-ispell))
  '(verilog-auto-newline nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
