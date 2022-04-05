@@ -30,7 +30,8 @@ values."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(octave
+   '(graphviz
+     octave
      rust
      (ivy :variables ivy-enable-advanced-buffer-information t ivy-enable-icons t)
      ;; helm
@@ -41,8 +42,7 @@ values."
      html
      javascript
      (auto-completion :variables auto-completion-use-company-box t)
-     (git :variables git-enable-magit-todos-plugin t)
-     github
+     (git :variables git-enable-magit-todos-plugin t git-enable-magit-delta-plugin t)
      (python :variables python-test-runner 'pytest python-backend 'lsp python-lsp-server 'pylsp python-formatter 'black python-format-on-save t python-poetry-activate t)
      ipython-notebook
      (c-c++ :variables c-c++-backend 'lsp-ccls c-c++-adopt-subprojects t)
@@ -84,6 +84,8 @@ values."
    dotspacemacs-additional-packages '(
                                       (sedona-mode :location
                                                    (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
+                                      (latexmk-compile-mode :location
+                                                   (recipe :fetcher github :repo "brunosmmm/latexmk-utils"))
                                       font-lock-studio
                                       all-the-icons-dired
                                       bitbake
@@ -101,6 +103,7 @@ values."
                                       tree-sitter-langs
                                       dogears
                                       solaire-mode
+                                      powerthesaurus
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -200,7 +203,7 @@ values."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Iosevka"
-                               :size 26
+                               :size 13
                                :weight normal
                                :width normal
                                :powerline-scale 1.0)
@@ -767,8 +770,7 @@ you should place your code here."
   ;; (customize-set-variable 'helm-ff-lynx-style-map t)
 
   ;; transparency
-  (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
-  (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
+  (set-frame-parameter nil 'alpha-background 90)
 
   ;; lsp stuff
   (setq lsp-file-watch-threshold 2000)
@@ -834,8 +836,19 @@ you should place your code here."
   (spacemacs/set-leader-keys "bgr" 'dogears-remember)
   (spacemacs/set-leader-keys "bgg" 'dogears-go)
 
-  (lsp-register-custom-settings '(("latex.rootDirectory" ".")))
   (solaire-global-mode +1)
+
+  (require 'powerthesaurus)
+  (spacemacs/declare-prefix "xp" "powerthesaurus")
+  (spacemacs/set-leader-keys "xps" 'powerthesaurus-lookup-synonyms-dwim)
+  (spacemacs/set-leader-keys "xpa" 'powerthesaurus-lookup-antonyms-dwim)
+  (spacemacs/set-leader-keys "xpd" 'powerthesaurus-lookup-definitions-dwim)
+  (spacemacs/set-leader-keys "xpr" 'powerthesaurus-lookup-related-dwim)
+
+  (add-to-list 'auto-mode-alist '("\\.bb\\'" . bitbake-mode))
+  (add-to-list 'auto-mode-alist '("\\.inc\\'" . bitbake-mode))
+  (setq undo-tree-enable-undo-in-region t)
+  (pixel-scroll-precision-mode 1)
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
@@ -860,12 +873,13 @@ This function is called at the very end of Spacemacs initialization."
  '(org-agenda-files
    '("~/work/org/personal/agenda.org" "~/work/org/personal/ideas.org" "~/work/org/neu/neu-agenda.org" "~/work/org/neu/esl/4534clock2020.org" "~/work/org/oneshot.org" "~/work/org/inbox.org" "~/work/org/neu/esl/acc_coupling/planning.org" "~/work/org/neu/esl/ilpform/planning.org"))
  '(package-selected-packages
-   '(sedona-mode ron-mode helm-gtags rust-mode doom-monokai-classic-theme yapfify yaml-mode xterm-color xcscope ws-butler winum which-key wgrep web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toml-mode toc-org textx-mode tagedit systemd spotify spaceline solaire-mode smex smeargle slim-mode slack shell-pop scss-mode scala-mode sbt-mode sass-mode restart-emacs rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode popwin plantuml-mode pip-requirements persp-mode paradox ox-reveal ox-hugo ox-gfm orgit org-ref org-projectile org-present org-pomodoro org-mime org-download org-caldav org-bullets open-junk-file noflet neotree multi-term move-text markdown-toc magit-todos magit-gitflow magit-gh-pulls macrostep lsp-focus lorem-ipsum livid-mode live-py-mode linum-relative link-hint js2-refactor js-doc ivy-hydra insert-shebang indent-guide imenu-list ibuffer-projectile hy-mode hungry-delete highlight-parentheses highlight-numbers highlight-indentation helm-make google-translate golden-ratio gnuplot gitignore-mode github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags fuzzy flyspell-correct-ivy flycheck-rust flycheck-pos-tip flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump doom-themes dockerfile-mode docker disaster diminish deft define-word cython-mode counsel-projectile company-web company-statistics company-shell company-c-headers company-auctex company-anaconda column-enforce-mode coffee-mode cmake-mode clean-aindent-mode clang-format cargo bitbake auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons-ivy-rich all-the-icons-dired aggressive-indent adaptive-wrap ace-window ace-link ac-ispell))
- '(verilog-auto-newline nil))
+   '(graphviz-dot-mode latexmk-compile-mode sedona-mode ron-mode helm-gtags rust-mode doom-monokai-classic-theme yapfify yaml-mode xterm-color xcscope ws-butler winum which-key wgrep web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toml-mode toc-org textx-mode tagedit systemd spotify spaceline solaire-mode smex smeargle slim-mode slack shell-pop scss-mode scala-mode sbt-mode sass-mode restart-emacs rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode popwin plantuml-mode pip-requirements persp-mode paradox ox-reveal ox-hugo ox-gfm orgit org-ref org-projectile org-present org-pomodoro org-mime org-download org-caldav org-bullets open-junk-file noflet neotree multi-term move-text markdown-toc magit-todos magit-gitflow magit-gh-pulls macrostep lsp-focus lorem-ipsum livid-mode live-py-mode linum-relative link-hint js2-refactor js-doc ivy-hydra insert-shebang indent-guide imenu-list ibuffer-projectile hy-mode hungry-delete highlight-parentheses highlight-numbers highlight-indentation helm-make google-translate golden-ratio gnuplot gitignore-mode github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md ggtags fuzzy flyspell-correct-ivy flycheck-rust flycheck-pos-tip flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump doom-themes dockerfile-mode docker disaster diminish deft define-word cython-mode counsel-projectile company-web company-statistics company-shell company-c-headers company-auctex company-anaconda column-enforce-mode coffee-mode cmake-mode clean-aindent-mode clang-format cargo bitbake auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons-ivy-rich all-the-icons-dired aggressive-indent adaptive-wrap ace-window ace-link ac-ispell))
+ '(verilog-auto-newline nil)
+ '(warning-suppress-log-types '((magit-todos))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(highlight-parentheses-highlight ((nil (:weight ultra-bold))) t))
 )
