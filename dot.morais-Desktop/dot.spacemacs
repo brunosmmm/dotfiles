@@ -102,7 +102,7 @@ values."
                                       tree-sitter
                                       tree-sitter-langs
                                       dogears
-                                      solaire-mode
+                                      org-static-blog
                                       powerthesaurus
                                       )
    ;; A list of packages that cannot be updated.
@@ -399,8 +399,8 @@ you should place your code here."
   (windmove-default-keybindings)
 
   ;;flycheck force C++11
-  (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
-  (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
+  ;; (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
+  ;; (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
 
   ;;enable global ws-butler
   (ws-butler-global-mode 1)
@@ -422,6 +422,10 @@ you should place your code here."
           ,(concat dotspacemacs-org-directory "inbox.org")
           ,(concat dotspacemacs-org-directory "personal/clock.org")))
 
+  (defun my/fix-inline-images ()
+    (when org-inline-image-overlays
+      (org-redisplay-inline-images)))
+
   ;; org config
   (with-eval-after-load 'org
     (setq org-directory dotspacemacs-org-directory)
@@ -430,7 +434,7 @@ you should place your code here."
     (setq org-journal-dir (concat dotspacemacs-org-directory "journal"))
     (setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
     (org-babel-do-load-languages 'org-babel-load-languages
-                                 '((plantuml . t) (shell . t) (R . t) (python . t)))
+                                 '((plantuml . t) (shell . t) (R . t) (python . t) (dot . t)))
 
     (setq org-refile-targets '((bmorais/agenda-files :maxlevel . 2)))
     ;; org capture templates stolen from https://blog.jethro.dev/posts/capturing_inbox/ and modified
@@ -453,6 +457,8 @@ you should place your code here."
             ("Lo" "other items" checkitem (id "cdba90be-e668-470a-a4bf-eaca8c11dfd9")
              "- [ ] %?")
             ))
+
+    (add-hook 'org-babel-after-execute-hook 'my/fix-inline-images)
     )
 
   ;; custom agenda view with my categories
@@ -835,8 +841,6 @@ you should place your code here."
   (spacemacs/set-leader-keys "bgf" 'dogears-forward)
   (spacemacs/set-leader-keys "bgr" 'dogears-remember)
   (spacemacs/set-leader-keys "bgg" 'dogears-go)
-
-  (solaire-global-mode +1)
 
   (require 'powerthesaurus)
   (spacemacs/declare-prefix "xp" "powerthesaurus")

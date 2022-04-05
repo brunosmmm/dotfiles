@@ -30,7 +30,8 @@ values."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(octave
+   '(graphviz
+     octave
      rust
      (ivy :variables ivy-enable-advanced-buffer-information t ivy-enable-icons t)
      ;; helm
@@ -41,7 +42,7 @@ values."
      html
      javascript
      (auto-completion :variables auto-completion-use-company-box t)
-     (git :variables git-enable-magit-todos-plugin t)
+     (git :variables git-enable-magit-todos-plugin t git-enable-magit-delta-plugin t)
      (python :variables python-test-runner 'pytest python-backend 'lsp python-lsp-server 'pylsp python-formatter 'black python-format-on-save t python-poetry-activate t)
      ipython-notebook
      (c-c++ :variables c-c++-backend 'lsp-ccls c-c++-adopt-subprojects t)
@@ -75,7 +76,6 @@ values."
      meson
      helpful
      (unicode-fonts)
-     (graphviz)
    )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -86,10 +86,11 @@ values."
                                                    (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
                                       (latexmk-compile-mode :location
                                                    (recipe :fetcher github :repo "brunosmmm/latexmk-utils"))
+                                      font-lock-studio
                                       all-the-icons-dired
                                       bitbake
                                       doom-themes
-                                      (textx-mode :location (recipe :fetcher github :repo "brunosmmm/textx-mode"))
+                                      (textx-mode :location (recipe :fetcher github :repo "brunosmmm/textx-mode" :branch "fix-imenu"))
                                       focus
                                       (lsp-focus :location (recipe :fetcher github :repo "emacs-lsp/lsp-focus"))
                                       ox-hugo
@@ -633,6 +634,7 @@ you should place your code here."
   ;; overwrite agenda keybindings
   (spacemacs/set-leader-keys "aoa" 'bmorais/show-agenda)
   ;; set some more agenda-related bindings
+  (spacemacs/declare-prefix "aoq" "bmorais-org-ql")
   (spacemacs/set-leader-keys "aoqs" 'bmorais/show-ql-soon)
   (spacemacs/set-leader-keys "aoqt" 'bmorais/show-ql-today)
   (spacemacs/set-leader-keys "aoql" 'bmorais/show-ql-longterm)
@@ -833,13 +835,22 @@ you should place your code here."
 
   ;; dogears
   (dogears-mode 1)
+  (spacemacs/declare-prefix "bg" "dogears")
   (spacemacs/set-leader-keys "bgl" 'dogears-list)
   (spacemacs/set-leader-keys "bgb" 'dogears-back)
   (spacemacs/set-leader-keys "bgf" 'dogears-forward)
   (spacemacs/set-leader-keys "bgr" 'dogears-remember)
   (spacemacs/set-leader-keys "bgg" 'dogears-go)
 
+  (require 'powerthesaurus)
+  (spacemacs/declare-prefix "xp" "powerthesaurus")
+  (spacemacs/set-leader-keys "xps" 'powerthesaurus-lookup-synonyms-dwim)
+  (spacemacs/set-leader-keys "xpa" 'powerthesaurus-lookup-antonyms-dwim)
+  (spacemacs/set-leader-keys "xpd" 'powerthesaurus-lookup-definitions-dwim)
+  (spacemacs/set-leader-keys "xpr" 'powerthesaurus-lookup-related-dwim)
+
   (add-to-list 'auto-mode-alist '("\\.bb\\'" . bitbake-mode))
+  (add-to-list 'auto-mode-alist '("\\.inc\\'" . bitbake-mode))
   (setq undo-tree-enable-undo-in-region t)
 
   (pixel-scroll-precision-mode 1)
@@ -860,6 +871,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("a8c210aa94c4eae642a34aaf1c5c0552855dfca2153fa6dd23f3031ce19453d4" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "11e57648ab04915568e558b77541d0e94e69d09c9c54c06075938b6abc0189d8" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default))
+ '(doc-view-resolution 600)
  '(ein:output-area-inlined-images t)
  '(evil-want-Y-yank-to-eol nil)
  '(highlight-indent-guides-method 'bitmap)
