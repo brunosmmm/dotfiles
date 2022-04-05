@@ -42,7 +42,6 @@ values."
      javascript
      (auto-completion :variables auto-completion-use-company-box t)
      (git :variables git-enable-magit-todos-plugin t)
-     github
      (python :variables python-test-runner 'pytest python-backend 'lsp python-lsp-server 'pylsp python-formatter 'black python-format-on-save t python-poetry-activate t)
      ipython-notebook
      (c-c++ :variables c-c++-backend 'lsp-ccls c-c++-adopt-subprojects t)
@@ -75,19 +74,22 @@ values."
      (json :variables json-fmt-on-save t)
      meson
      helpful
-     (unicode-fonts :variables unicode-fonts-enable-ligatures t)
+     (unicode-fonts)
+     (graphviz)
    )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(
-                                      ;; (sedona-mode :location
-                                      ;;              (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
+                                      (sedona-mode :location
+                                                   (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
+                                      (latexmk-compile-mode :location
+                                                   (recipe :fetcher github :repo "brunosmmm/latexmk-utils"))
                                       all-the-icons-dired
                                       bitbake
                                       doom-themes
-                                      (textx-mode :location (recipe :fetcher github :repo "novakboskov/textx-mode"))
+                                      (textx-mode :location (recipe :fetcher github :repo "brunosmmm/textx-mode"))
                                       focus
                                       (lsp-focus :location (recipe :fetcher github :repo "emacs-lsp/lsp-focus"))
                                       ox-hugo
@@ -100,6 +102,7 @@ values."
                                       tree-sitter-langs
                                       dogears
                                       org-static-blog
+                                      powerthesaurus
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -395,8 +398,8 @@ you should place your code here."
   (windmove-default-keybindings)
 
   ;;flycheck force C++11
-  (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
-  (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
+  ;; (add-hook 'c++-mode-hook (lambda () (setq flycheck-gcc-language-standard "c++11")))
+  ;; (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
 
   ;;enable global ws-butler
   (ws-butler-global-mode 1)
@@ -418,6 +421,10 @@ you should place your code here."
           ,(concat dotspacemacs-org-directory "inbox.org")
           ,(concat dotspacemacs-org-directory "personal/clock.org")))
 
+  (defun my/fix-inline-images ()
+    (when org-inline-image-overlays
+      (org-redisplay-inline-images)))
+
   ;; org config
   (with-eval-after-load 'org
     (setq org-directory dotspacemacs-org-directory)
@@ -426,7 +433,7 @@ you should place your code here."
     (setq org-journal-dir (concat dotspacemacs-org-directory "journal"))
     (setq org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar")
     (org-babel-do-load-languages 'org-babel-load-languages
-                                 '((plantuml . t) (shell . t) (R . t) (python . t)))
+                                 '((plantuml . t) (shell . t) (R . t) (python . t) (dot . t)))
 
     (setq org-refile-targets '((bmorais/agenda-files :maxlevel . 2)))
     ;; org capture templates stolen from https://blog.jethro.dev/posts/capturing_inbox/ and modified
@@ -449,6 +456,8 @@ you should place your code here."
             ("Lo" "other items" checkitem (id "cdba90be-e668-470a-a4bf-eaca8c11dfd9")
              "- [ ] %?")
             ))
+
+    (add-hook 'org-babel-after-execute-hook 'my/fix-inline-images)
     )
 
   ;; custom agenda view with my categories
@@ -765,8 +774,7 @@ you should place your code here."
   ;; (customize-set-variable 'helm-ff-lynx-style-map t)
 
   ;; transparency
-  ;; (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
-  ;; (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
+  (set-frame-parameter nil 'alpha-background 90)
 
   ;; lsp stuff
   (setq lsp-file-watch-threshold 2000)
@@ -830,6 +838,13 @@ you should place your code here."
   (spacemacs/set-leader-keys "bgf" 'dogears-forward)
   (spacemacs/set-leader-keys "bgr" 'dogears-remember)
   (spacemacs/set-leader-keys "bgg" 'dogears-go)
+
+  (add-to-list 'auto-mode-alist '("\\.bb\\'" . bitbake-mode))
+  (setq undo-tree-enable-undo-in-region t)
+
+  (pixel-scroll-precision-mode 1)
+  (setq pixel-scroll-precision-large-scroll-height 20.0)
+  (setq pixel-scroll-precision-interpolation-factor 30)
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
