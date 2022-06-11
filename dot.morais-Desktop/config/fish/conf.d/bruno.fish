@@ -10,7 +10,7 @@ set -U fish_user_paths /home/bruno/.local/bin $fish_user_paths
 
 # configure display
 set -gx QT_AUTO_SCREEN_SCALE_FACTOR 1
-if test $GDMSESSION = "i3"
+if test "$GDMSESSION" = "i3"
     set -gx GDK_SCALE 2
     set -gx GDK_DPI_SCALE 0.5
 end

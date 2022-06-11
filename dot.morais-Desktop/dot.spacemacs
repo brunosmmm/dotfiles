@@ -84,11 +84,11 @@ values."
    dotspacemacs-additional-packages '(
                                       (sedona-mode :location
                                                    (recipe :fetcher github :repo "brunosmmm/sedona-mode"))
-                                      (latexmk-compile-mode :location
-                                                   (recipe :fetcher github :repo "brunosmmm/latexmk-utils"))
+                                      ;; (latexmk-compile-mode :location
+                                      ;;              (recipe :fetcher github :repo "brunosmmm/latexmk-utils"))
                                       font-lock-studio
                                       all-the-icons-dired
-                                      bitbake
+                                      (bitbake :location (recipe :fetcher github :repo "brunosmmm/bitbake-el"))
                                       doom-themes
                                       (textx-mode :location (recipe :fetcher github :repo "brunosmmm/textx-mode" :branch "fix-imenu"))
                                       focus
@@ -759,6 +759,7 @@ you should place your code here."
         (setq doom-modeline-project-detection 'projectile)
         (setq doom-modeline-height 1)
         (setq doom-modeline-github t)
+        (setq doom-modeline-enable-word-count t)
         (set-face-attribute 'mode-line nil :height 90)
         (set-face-attribute 'mode-line-inactive nil :height 90)
         (set-face-attribute 'doom-modeline-bar nil :background "#ffb300")
@@ -851,8 +852,14 @@ you should place your code here."
 
   (add-to-list 'auto-mode-alist '("\\.bb\\'" . bitbake-mode))
   (add-to-list 'auto-mode-alist '("\\.inc\\'" . bitbake-mode))
-  (setq undo-tree-enable-undo-in-region t)
   (pixel-scroll-precision-mode 1)
+
+  ;; disable annoying native compilation warning popup window
+  (setq native-comp-async-report-warnings-errors nil)
+
+  ;; set up undo
+  (setq undo-tree-enable-undo-in-region t)
+  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
