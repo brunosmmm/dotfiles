@@ -124,7 +124,7 @@ if __name__ == "__main__":
                 args.quiet,
                 direction="repo",
             )
-        except DotfileException as ex:
+        except (DotfileException, OSError) as ex:
             error(str(ex))
             exit(1)
     elif args.cmd == "install":
@@ -137,7 +137,7 @@ if __name__ == "__main__":
                 direction="home",
                 install_new=args.new_files,
             )
-        except DotfileException as ex:
+        except (DotfileException, OSError) as ex:
             error(str(ex))
             exit(1)
     elif args.cmd == "inspect":

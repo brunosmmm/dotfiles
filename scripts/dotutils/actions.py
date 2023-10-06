@@ -4,7 +4,7 @@ import os
 import shutil
 from dotutils.git import GitDotfileInspector, DotFileNotMonitoredError
 from dotutils.postactions import POST_ACTION_MGR, PostActionMgr
-from dotutils.messages import warning, info, message
+from dotutils.messages import warning, info, message, input
 
 
 def update_file(src, dest, direction):
@@ -107,16 +107,16 @@ def update(
                     # skip
                     continue
                 if direction == "home" and new_file is True:
-                    choice = input(f"{dest} (new) [install (i)/skip (s)]")
+                    choice = input(f"{dest} (new) [ install (i)/skip (s) ]")
                     # replace i with u, all the same
                     choice = "u" if choice == "i" else "s"
                 else:
-                    choice = input(f"{dest} [update (u)/skip (s)/diff (d)]?")
+                    choice = input(f"{dest} [ update (u)/skip (s)/diff (d) ]?")
                 if choice == "u":
                     update_file(src, dest, direction)
                 elif choice == "d":
-                    print(ins.diff_file(dest, direction))
-                    choice = input(f"{dest} [update (u)/skip (s)]?")
+                    message(ins.diff_file(dest, direction))
+                    choice = input(f"{dest} [ update (u)/skip (s) ]?")
                     if choice == "u":
                         update_file(src, dest, direction)
                     else:
@@ -124,16 +124,29 @@ def update(
                 else:
                     print("skipped")
             else:
-                print(dest)
+                message(dest)
 
     if interactive is True:
         # update already occurred
         exit(0)
 
-    if direction == "home":
-        choice = input("Update home folder [y/n]") if quiet is False else "y"
-    else:
-        choice = input("Update repository? [y/n]") if quiet is False else "y"
+    try:
+        if direction == "home":
+            choice = (
+                input("Update home folder [ y / n ]")
+                if quiet is False
+                else "y"
+            )
+        else:
+            choice = (
+                input("Update repository? [ y / n ]")
+                if quiet is False
+                else "y"
+            )
+    except KeyboardInterrupt:
+        print("")
+        info("Aborted")
+        exit(0)
 
     if choice == "y":
         # update
