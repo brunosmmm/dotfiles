@@ -116,20 +116,36 @@ if __name__ == "__main__":
         parser.print_usage()
         exit(0)
     elif args.cmd == "update":
-        update(
-            args.p, args.home, args.interactive, args.quiet, direction="repo"
-        )
+        try:
+            update(
+                args.p,
+                args.home,
+                args.interactive,
+                args.quiet,
+                direction="repo",
+            )
+        except DotfileException as ex:
+            error(str(ex))
+            exit(1)
     elif args.cmd == "install":
-        update(
-            p_real,
-            home_real,
-            args.interactive,
-            args.quiet,
-            direction="home",
-            install_new=args.new_files,
-        )
+        try:
+            update(
+                p_real,
+                home_real,
+                args.interactive,
+                args.quiet,
+                direction="home",
+                install_new=args.new_files,
+            )
+        except DotfileException as ex:
+            error(str(ex))
+            exit(1)
     elif args.cmd == "inspect":
-        ret = inspect(p_real, home_real, args.fname, args.diff)
+        try:
+            ret = inspect(p_real, home_real, args.fname, args.diff)
+        except (OSError, DotfileException) as ex:
+            error(str(ex))
+            exit(1)
         if ret["status"] == "err":
             if args.s:
                 print("error")
