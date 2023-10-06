@@ -4,6 +4,7 @@ import os
 import shutil
 from dotutils.git import GitDotfileInspector, DotFileNotMonitoredError
 from dotutils.postactions import POST_ACTION_MGR, PostActionMgr
+from dotutils.messages import warning, info, message
 
 
 def update_file(src, dest, direction):
@@ -23,7 +24,7 @@ def update_file(src, dest, direction):
             name, _ = POST_ACTION_MGR.get_postaction_description(
                 PostActionMgr.POSTACTION_UPDATE, idx
             )
-            print(f"WARNING: postaction '{name}' failed for file '{dest}'")
+            warning(f"postaction '{name}' failed for file '{dest}'")
 
 
 def update_all(changes, direction, install_new=False):
@@ -44,7 +45,7 @@ def update_all(changes, direction, install_new=False):
                 PostActionMgr.POSTACTION_UPDATE, idx
             )
             fname = user_file if direction == "home" else repo_file
-            print(f"WARNING: postaction '{name}' failed for file '{fname}'")
+            warning(f"postaction '{name}' failed for file '{fname}'")
 
 
 def inspect(dot_path, home_path, fname, diff=False, direction="repo"):
@@ -77,7 +78,7 @@ def update(
     """Perform update."""
     ins = GitDotfileInspector(dot_path, home_path)
     if quiet is False:
-        print("Checking for changes...")
+        message("Checking for changes...")
 
     if direction not in ("repo", "home"):
         raise ValueError("direction must be either home or repo")
@@ -89,7 +90,7 @@ def update(
             for changed, new_file in changes.values()
             if new_file and install_new or new_file is False
         ]
-        print(
+        info(
             "{} files have changed{}".format(
                 "No" if not counted_changes else len(counted_changes),
                 "" if not counted_changes else ":",
@@ -138,4 +139,15 @@ def update(
         # update
         update_all(changes, direction, install_new=install_new)
     else:
-        print("Aborted")
+        info("Aborted")
+
+
+def list_files(dot_path, home_path, machine=False):
+    """ "List files."""
+    ins = GitDotfileInspector(dot_path, home_path)
+    ret = ins.inspect()
+    if machine:
+        print(ret)
+    else:
+        for repo_file, user_file in ret.items():
+            message(f"{repo_file} -> {user_file}")
