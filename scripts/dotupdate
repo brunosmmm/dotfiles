@@ -6,19 +6,22 @@ import json
 from pathlib import Path
 from argparse import ArgumentParser
 
-from dotutils.actions import update, inspect
+
+from dotutils.actions import update, inspect, list_files
+from dotutils.exceptions import DotfileException
 from dotutils.postactions import (
     POST_ACTION_MGR,
     PostActionMgr,
     make_shell_post_action,
 )
+from dotutils.messages import error, warning, info
 
 
 def add_postactions(postactions: dict):
     """Add postactions from configuration."""
     postactions = postactions.get("postactions")
     if postactions is None:
-        print("WARNING: invalid postaction configuration")
+        warning("invalid postaction configuration")
         return
 
     for postaction in postactions:
@@ -29,7 +32,7 @@ def add_postactions(postactions: dict):
         descr = postaction.get("description")
 
         if action is None or file_ext is None or shell_cmd is None:
-            print("WARNING: invalid postaction configuration")
+            warning("invalid postaction configuration")
             return
         shell_postaction = make_shell_post_action(
             action, file_ext, shell_cmd, name, descr
@@ -45,12 +48,15 @@ if __name__ == "__main__":
     parser.add_argument("p", help="dot files storage path")
     subparsers = parser.add_subparsers(help="sub-commands", dest="cmd")
     inspect_parser = subparsers.add_parser("inspect", help="inspect files")
+    list_parser = subparsers.add_parser("list", help="list files")
     inspect_parser.add_argument("fname", help="file to inspect")
     inspect_parser.add_argument(
         "--diff", action="store_true", help="show diff"
     )
-    inspect_parser.add_argument(
-        "-s", help="machine readable output", action="store_true"
+    parser.add_argument(
+        "-s",
+        help="output machine readable format when possible",
+        action="store_true",
     )
     update_parser = subparsers.add_parser(
         "update", help="update dotfiles from home directory"
@@ -91,14 +97,17 @@ if __name__ == "__main__":
     config_path = os.path.join(dotupdate_path, "config")
     postaction_config = os.path.join(config_path, "postactions.json")
 
+    p_real = os.path.realpath(args.p)
+    home_real = os.path.realpath(args.home)
+
     postactions = None
     try:
         with open(postaction_config, "r") as postaction_data:
             postactions = json.load(postaction_data)
     except json.JSONDecodeError:
-        print("WARNING: malformed json, cannot load postaction configuration")
+        warning("malformed json, cannot load postaction configuration")
     except OSError:
-        print("WARNING: could not open postaction configuration file")
+        warning("could not open postaction configuration file")
 
     if postactions is not None:
         add_postactions(postactions)
@@ -112,20 +121,20 @@ if __name__ == "__main__":
         )
     elif args.cmd == "install":
         update(
-            args.p,
-            args.home,
+            p_real,
+            home_real,
             args.interactive,
             args.quiet,
             direction="home",
             install_new=args.new_files,
         )
     elif args.cmd == "inspect":
-        ret = inspect(args.p, args.home, args.fname, args.diff)
+        ret = inspect(p_real, home_real, args.fname, args.diff)
         if ret["status"] == "err":
             if args.s:
                 print("error")
             else:
-                print(ret["err"])
+                error(ret["err"])
             exit(1)
         elif ret["status"] == "okay":
             if "diff" in ret:
@@ -138,9 +147,15 @@ if __name__ == "__main__":
                     if args.s:
                         print("modified")
                     else:
-                        print("File has been modified")
+                        info("File has been modified")
                 else:
                     if args.s:
                         print("unmodified")
                     else:
-                        print("File has not been modified")
+                        info("File has not been modified")
+    elif args.cmd == "list":
+        try:
+            ret = list_files(p_real, home_real, args.s)
+        except (OSError, DotfileException) as ex:
+            error(str(ex))
+            exit(1)

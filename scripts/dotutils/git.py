@@ -13,7 +13,7 @@ class DotFileNotMonitoredError(Exception):
 class GitDotfileInspector:
     """Inspect git repository for dotfiles."""
 
-    def __init__(self, path_to_dotfiles, home_path):
+    def __init__(self, path_to_dotfiles, home_path, force=False):
         """Initialize."""
         if not os.path.exists(path_to_dotfiles) or not os.path.isdir(
             path_to_dotfiles
@@ -24,6 +24,14 @@ class GitDotfileInspector:
 
         if not os.path.exists(home_path) or not os.path.isdir(home_path):
             raise OSError(f"path is invalid or not a directory: {home_path}")
+
+        if (
+            not os.path.exists(os.path.join(path_to_dotfiles, ".dotfiles"))
+            and force is False
+        ):
+            raise exceptions.DotfileException(
+                "directory is not a dotfile repository"
+            )
 
         if not os.path.isabs(path_to_dotfiles):
             path_to_dotfiles = os.path.join(os.getcwd(), path_to_dotfiles)
@@ -51,6 +59,7 @@ class GitDotfileInspector:
         def delete_prefix(s, p):
             if s.startswith(p):
                 return s[len(p) :]
+            return s
 
         file_map = {}
         repo_path = self.get_repo_root(self._dot_path)
