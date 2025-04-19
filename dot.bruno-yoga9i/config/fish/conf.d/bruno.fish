@@ -18,7 +18,7 @@ set -gx PATH /home/bruno/.local/bin $PATH
 set -x EDITOR (which vim)
 
 # aliases
-alias ls exa
+alias ls eza
 # alias cat bat
 # alias ssh "env TERM=xterm-256color ssh"
 

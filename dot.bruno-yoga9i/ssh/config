@@ -1,5 +1,6 @@
-Host localhost
-     Port 2222
+Host qemu
+     HostName localhost
+     Port 10022
      StrictHostKeyChecking no
      UserKnownHostsFile = /dev/null
 

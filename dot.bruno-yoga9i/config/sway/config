@@ -22,7 +22,7 @@ set $menu bemenu-run -i --nb "#3f3f3f" --nf "#dcdccc" --fn "pango:FantasqueSansM
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg /usr/share/backgrounds/default.png fill
+#output * bg /usr/share/backgrounds/default.png fill
 #
 # Example configuration:
 #
