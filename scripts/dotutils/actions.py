@@ -13,7 +13,14 @@ def update_file(src, dest, direction):
     if direction not in ("home", "repo"):
         raise ValueError("direction must be either home or repo")
 
-    shutil.copyfile(src, dest, follow_symlinks=False)
+    if os.path.islink(dest):
+        return
+
+    dest_dir = os.path.dirname(dest)
+    if dest_dir:
+        os.makedirs(dest_dir, exist_ok=True)
+
+    shutil.copy2(src, dest, follow_symlinks=False)
 
     ret = POST_ACTION_MGR.decide_postaction(
         PostActionMgr.POSTACTION_UPDATE, src, dest, direction
@@ -42,10 +49,9 @@ def update_all(changes, direction, install_new=False):
     for idx, retval in enumerate(ret):
         if retval is False:
             name, _ = POST_ACTION_MGR.get_postaction_description(
-                PostActionMgr.POSTACTION_UPDATE, idx
+                PostActionMgr.POSTACTION_UPDATE_ALL, idx
             )
-            fname = user_file if direction == "home" else repo_file
-            warning(f"postaction '{name}' failed for file '{fname}'")
+            warning(f"postaction '{name}' failed")
 
 
 def inspect(dot_path, home_path, fname, diff=False, direction="repo"):
@@ -63,8 +69,7 @@ def inspect(dot_path, home_path, fname, diff=False, direction="repo"):
 
     if diff and _diff is not None:
         return {"status": "okay", "diff": _diff}
-    elif diff is False:
-        return {"status": "okay", "result": _diff is not None}
+    return {"status": "okay", "result": _diff is not None}
 
 
 def update(
@@ -88,7 +93,7 @@ def update(
         counted_changes = [
             changed
             for changed, new_file in changes.values()
-            if new_file and install_new or new_file is False
+            if (not new_file) or install_new or interactive
         ]
         info(
             "{} files have changed{}".format(
@@ -103,9 +108,6 @@ def update(
     if quiet is False:
         for dest, (src, new_file) in changes.items():
             if interactive is True:
-                if new_file is True and install_new is False:
-                    # skip
-                    continue
                 if direction == "home" and new_file is True:
                     choice = input(f"{dest} (new) [ install (i)/skip (s) ]")
                     # replace i with u, all the same
@@ -156,7 +158,7 @@ def update(
 
 
 def list_files(dot_path, home_path, machine=False):
-    """ "List files."""
+    """List files."""
     ins = GitDotfileInspector(dot_path, home_path)
     ret = ins.inspect()
     if machine:

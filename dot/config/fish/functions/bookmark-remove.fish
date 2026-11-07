@@ -7,7 +7,7 @@ function bookmark-remove -a bookmarkname -d "Remove a bookmark"
         echo "ERROR: bookmark file environment variable not set"
         return 1
     end
-    set ret (cat "$BOOKMARK_FILE" | jq ".\"$bookmarkname\"" -r)
+    set ret (cat "$BOOKMARKS_FILE" | jq ".\"$bookmarkname\"" -r)
     if test "$status" != 0
         echo "ERROR: internal error"
         return 1

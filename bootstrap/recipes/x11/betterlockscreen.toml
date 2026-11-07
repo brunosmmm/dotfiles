@@ -1,0 +1,6 @@
+
+description = "Better lockscreen"
+
+[install.arch]
+method = "aur"
+pkg-name = "betterlockscreen"

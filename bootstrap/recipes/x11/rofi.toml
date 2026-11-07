@@ -1,0 +1,6 @@
+
+description = "rofi"
+
+[install.arch]
+method = "pkg-manager"
+pkg-name = "rofi"

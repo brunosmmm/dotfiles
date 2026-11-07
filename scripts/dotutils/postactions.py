@@ -2,15 +2,11 @@
 
 import os
 import re
+import shlex
 import subprocess
 from typing import Any, Tuple, List, Optional
 from dotutils.git import GitDotfileInspector
 
-
-USER_FILE_SUB_REGEX = re.compile(r"\$\{user_file\}")
-REPO_FILE_SUB_REGEX = re.compile(r"\$\{repo_file\}")
-REPO_PATH_SUB_REGEX = re.compile(r"\$\{repo_path\}")
-DIRECTION_SUB_REGEX = re.compile(r"\$\{direction\}")
 
 DEBUG = os.environ.get("DEBUG")
 
@@ -66,9 +62,12 @@ class FileExtPostAction(PostAction):
         return self._ext
 
     def _match_ext(self, file_name: str) -> bool:
-        """Match extension."""
+        """Match file_ext regex against the suffix, with or without a leading dot."""
         _, ext = os.path.splitext(file_name)
-        return re.match(self._ext, ext) is not None
+        candidates = [ext]
+        if ext.startswith("."):
+            candidates.append(ext[1:])
+        return any(re.fullmatch(self._ext, candidate) for candidate in candidates)
 
     def will_act(self, file_name: str) -> bool:
         """Decide if will act or not."""
@@ -83,8 +82,8 @@ class FileInstallPostAction(FileExtPostAction):
         super().__init__(file_ext)
 
     def will_act(self, file_name: str, direction: str) -> bool:
-        """Decide."""
-        if direction == "home":
+        """Run when copying into the home directory."""
+        if direction != "home":
             return False
         return super().will_act(file_name)
 
@@ -146,21 +145,19 @@ def make_shell_post_action(
             """Call shell command."""
             user_file = src if fs_dir == "repo" else dest
             repo_file = src if fs_dir == "home" else dest
-            if fs_dir == "repo":
-                repo_file_dir = os.path.join(*os.path.split(repo_file)[:-1])
-                repo_path = GitDotfileInspector.get_repo_root(repo_file_dir)
-            else:
-                raise RuntimeError(
-                    "home directory is not expected to be a git repository"
-                )
-            cmd = re.sub(USER_FILE_SUB_REGEX, user_file, shell_cmd)
-            cmd = re.sub(REPO_PATH_SUB_REGEX, repo_path, cmd)
-            cmd = re.sub(REPO_FILE_SUB_REGEX, repo_file, cmd)
-            cmd = re.sub(DIRECTION_SUB_REGEX, direction, cmd)
+            repo_path = GitDotfileInspector.get_repo_root(
+                os.path.dirname(repo_file)
+            )
+            cmd = (
+                shell_cmd.replace("${user_file}", user_file)
+                .replace("${repo_path}", repo_path)
+                .replace("${repo_file}", repo_file)
+                .replace("${direction}", direction)
+            )
             try:
                 if DEBUG:
                     print(f"DEBUG: calling '{cmd}'")
-                subprocess.check_call(cmd.split(" "))
+                subprocess.check_call(shlex.split(cmd))
                 return True
             except subprocess.CalledProcessError:
                 return False
@@ -184,17 +181,15 @@ class PostActionMgr:
         }
 
     def _decide_postaction_update(
-        self, user_file: str, repo_file: str, reverse: bool
-    ) -> List[bool]:
+        self, src: str, dest: str, direction: str
+    ) -> List[Optional[bool]]:
         """Decide postaction on update."""
         postaction_results = []
         for post_action in self._post_actions_by_type[self.POSTACTION_UPDATE]:
-            # check if we're going to act
-            if post_action.will_act(user_file, reverse):
-                ret = post_action.act(user_file, repo_file, reverse)
-                postaction_results.append(ret)
-            # did not act
-            postaction_results.append(None)
+            if post_action.will_act(src, direction):
+                postaction_results.append(post_action.act(src, dest, direction))
+            else:
+                postaction_results.append(None)
         return postaction_results
 
     def _postaction_update_all(self) -> List[bool]:
@@ -203,17 +198,17 @@ class PostActionMgr:
         for post_action in self._post_actions_by_type[
             self.POSTACTION_UPDATE_ALL
         ]:
-            # just call everything
             ret = post_action.act()
             postaction_results.append(ret)
         return postaction_results
 
-    def decide_postaction(self, action: int, *args: Any) -> List[bool]:
+    def decide_postaction(self, action: int, *args: Any) -> List[Optional[bool]]:
         """Decide which postaction to call based on files."""
         if action == self.POSTACTION_UPDATE:
             return self._decide_postaction_update(*args)
         if action == self.POSTACTION_UPDATE_ALL:
             return self._postaction_update_all()
+        return []
 
     def register_postaction(self, action: int, post_action: PostAction):
         """Register new postaction."""

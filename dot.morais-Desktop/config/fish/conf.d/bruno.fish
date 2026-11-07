@@ -16,4 +16,4 @@ if test "$GDMSESSION" = "i3"
 end
 
 # aliases
-alias ls exa
+alias ls eza

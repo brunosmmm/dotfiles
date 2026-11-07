@@ -1,16 +1,16 @@
-
 global:
   fish
   alacritty
   emacs
   the_silver_searcher
   bat
-  exa
+  eza
   brave
   fd
   pass
   expect
   keychain
+  jq
 
 editor:
   spacemacs
@@ -19,15 +19,21 @@ editor:
   texlab
   ccls
 
-X11:
+X11 (morais-Desktop):
   i3
   rofi
   betterlockscreen
+  picom
+  dunst
+  bumblebee-status
 
-wayland:
+wayland (bruno-yoga9i):
   sway
   waybar
   mako
+  kanshi
+  swaylock
+  bemenu
 
 utils:
   xournalpp

@@ -1,6 +1,7 @@
+# oh-my-fish plugins, installed separately (not managed by this repo).
+# bobthefish is implied by theme_nerd_fonts in host conf.d files.
 omf:
   cd
-  fasd
   foreign-env
   pisces
   bobthefish

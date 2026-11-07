@@ -33,7 +33,7 @@ def add_postactions(postactions: dict):
 
         if action is None or file_ext is None or shell_cmd is None:
             warning("invalid postaction configuration")
-            return
+            continue
         shell_postaction = make_shell_post_action(
             action, file_ext, shell_cmd, name, descr
         )
@@ -65,10 +65,12 @@ if __name__ == "__main__":
         "install", help="install dotfiles to home directory"
     )
     install_parser.add_argument(
-        "--new-files", help="Install new files", action="store_true"
+        "--new-files",
+        help="include new files in non-interactive install (interactive always offers them)",
+        action="store_true",
     )
     parser.add_argument(
-        "--home", help="home directory path", default=os.environ["HOME"]
+        "--home", help="home directory path", default=str(Path.home())
     )
     group = update_parser.add_mutually_exclusive_group()
     group.add_argument(
@@ -84,7 +86,6 @@ if __name__ == "__main__":
     group.add_argument(
         "--quiet", help="quietly update", action="store_true", default=False
     )
-    group.add_argument("--diff", help="get diff for a monitored file")
     group.add_argument(
         "--interactive",
         help="update interactively",
@@ -118,13 +119,13 @@ if __name__ == "__main__":
     elif args.cmd == "update":
         try:
             update(
-                args.p,
-                args.home,
+                p_real,
+                home_real,
                 args.interactive,
                 args.quiet,
                 direction="repo",
             )
-        except (DotfileException, OSError) as ex:
+        except (DotfileException, OSError, RuntimeError) as ex:
             error(str(ex))
             exit(1)
     elif args.cmd == "install":
@@ -137,13 +138,13 @@ if __name__ == "__main__":
                 direction="home",
                 install_new=args.new_files,
             )
-        except (DotfileException, OSError) as ex:
+        except (DotfileException, OSError, RuntimeError) as ex:
             error(str(ex))
             exit(1)
     elif args.cmd == "inspect":
         try:
             ret = inspect(p_real, home_real, args.fname, args.diff)
-        except (OSError, DotfileException) as ex:
+        except (OSError, DotfileException, RuntimeError) as ex:
             error(str(ex))
             exit(1)
         if ret["status"] == "err":
@@ -172,6 +173,6 @@ if __name__ == "__main__":
     elif args.cmd == "list":
         try:
             ret = list_files(p_real, home_real, args.s)
-        except (OSError, DotfileException) as ex:
+        except (OSError, DotfileException, RuntimeError) as ex:
             error(str(ex))
             exit(1)

@@ -1,7 +1,6 @@
 function project-pull -a projname -d "Pull updated project files."
     set ret (__project_check_project $projname)
-    set match (echo $ret | string match "^ERROR:.*" -r)
-    if not test -z "$match"
+    if string match -rq -- '^ERROR:' $ret
         echo $ret
         return 1
     end

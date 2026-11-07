@@ -1,0 +1,6 @@
+
+description = "Polybar"
+
+[install.arch]
+method = "pkg-manager"
+pkg-name = "polybar"

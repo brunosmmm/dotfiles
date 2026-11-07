@@ -1,2 +1,8 @@
 .mypy_cache/
 __pycache__/
+
+# Local-only secrets and session state. Never commit.
+# keys.json, credentials.json, and ssh/config stay tracked: they hold
+# paths and usernames, not passwords or tokens (those live in pass).
+**/api-tokens.json
+**/musikcube/settings.json

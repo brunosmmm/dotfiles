@@ -50,13 +50,14 @@ def git_diff(path_a, path_b):
     """Get git diff output."""
     try:
         ret = subprocess.run(
-            ["git", "diff", path_a, path_b],
+            ["git", "diff", "--no-index", "--", path_a, path_b],
             stderr=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
-            check=True,
+            check=False,
         )
-    except subprocess.CalledProcessError as ex:
-        if ex.returncode == 1:
-            return ex.stdout.decode()
-        else:
-            raise RuntimeError("diff failed")
+    except OSError:
+        raise RuntimeError("diff failed")
+
+    if ret.returncode in (0, 1):
+        return ret.stdout.decode()
+    raise RuntimeError("diff failed")

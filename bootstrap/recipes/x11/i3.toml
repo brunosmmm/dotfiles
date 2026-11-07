@@ -1,0 +1,6 @@
+
+description = "i3 (gaps) Window Manager"
+
+[install.arch]
+method = "pkg-manager"
+pkg-name = "i3-gaps"

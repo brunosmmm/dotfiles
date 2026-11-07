@@ -12,13 +12,11 @@ function __project_check_project -a projname
     set projdir (__project_get_project_path "$projname")
     if test "$status" != 0
         echo "ERROR: could not find project named $projname"
-        return
+        return 1
     end
-    # try to see if it is a git repository
-    set isrepo (__project_is_git_repo "$projdir")
-    if test "$isrepo" = 0
+    if not __project_is_git_repo "$projdir"
         echo "ERROR: not a git repository"
-        return
+        return 1
     end
     set realdir (echo $projdir | string replace "~" $HOME)
     echo "$realdir"
