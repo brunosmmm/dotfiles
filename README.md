@@ -84,11 +84,6 @@ Passwords and tokens live in `pass`, not in git.
 
 See [doc/api-tokens-setup.md](doc/api-tokens-setup.md) for `dottokens` and `keys-setup`.
 
-**Last.fm:** session credentials were previously committed in
-`dot/config/musikcube/settings.json`. Revoke/rotate that Last.fm session at
-https://www.last.fm/settings before logging in again. The file is no longer
-tracked.
-
 ## Package lists
 
 Informal, not consumed by the installer:
