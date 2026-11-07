@@ -11,6 +11,7 @@ global:
   expect
   keychain
   jq
+  python3-rich
 
 editor:
   spacemacs

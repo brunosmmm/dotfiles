@@ -1,72 +1,47 @@
-# API Tokens via `pass` in `keys-setup`
+# API tokens via `pass`
 
-The `keys-setup` fish function can automatically export API tokens as environment
-variables. Tokens are stored in `pass` and mapped to environment variable names
-through a JSON config file.
+Tokens live in `pass`. `~/.config/projects/api-tokens.json` maps environment
+variable names to pass entry paths. That file is gitignored.
+
+`dottokens` edits the mapping. `keys-setup` exports the values into the current
+fish session. A Python process cannot export variables into the shell that
+launched it, so loading stays in fish.
 
 ## Prerequisites
 
-- `pass` (the standard unix password manager) initialized and working
-- `jq` installed
-- The `$KEY_CONFIG_FILE` environment variable set (e.g. `~/.config/projects/keys.json`)
-- GPG agent unlocked (handled by `keys-setup` itself via `keychain`)
+- `pass` initialized and working
+- `rich` (`python3 -m pip install --user rich` or the distro package)
+- `jq` (for `keys-setup`)
+- `$KEY_CONFIG_FILE` set (host `conf.d` does this)
 
-## Setup
+## Manage bindings
 
-### 1. Store tokens in `pass`
-
-For each API token, insert it into the pass store:
-
-```sh
-pass insert api.techfab.dev/credentials
+```fish
+dottokens                         # list (default)
+dottokens add                     # prompts for name + pass path
+dottokens add OPENAI_API_KEY api-tokens/openai
+dottokens add OPENAI_API_KEY api-tokens/openai --insert
+dottokens remove OPENAI_API_KEY
+dottokens remove OPENAI_API_KEY --from-pass
+dottokens check
 ```
 
-Use whatever path structure makes sense. The path you choose here is what you
-reference in the config file.
+`add` refuses a path that is not in the store unless you pass `--insert` or
+confirm the prompt (interactive). `--insert` runs `pass insert`.
 
-### 2. Create the config file
+`remove` only unbinds. `--from-pass` also deletes the store entry.
 
-Create `api-tokens.json` in the same directory as `$KEY_CONFIG_FILE`
-(typically `~/.config/projects/api-tokens.json`). This file is gitignored
-and must not be committed:
+After add or remove, run `keys-setup` in this shell to refresh exports.
 
-```json
-{
-  "TECHFAB_CREDENTIAL": "api.techfab.dev/credentials"
-}
-```
+## Load into fish
 
-Each key is the environment variable name that will be exported. Each value is
-the `pass` entry path.
-
-To add more tokens, add more entries:
-
-```json
-{
-  "TECHFAB_CREDENTIAL": "api.techfab.dev/credentials",
-  "OPENAI_API_KEY": "api-tokens/openai",
-  "ANTHROPIC_API_KEY": "api-tokens/anthropic"
-}
-```
-
-### 3. Run `keys-setup`
-
-```sh
+```fish
 keys-setup
 ```
 
-The function loads SSH/GPG keys as before, then reads `api-tokens.json` and
-for each entry calls `pass show <entry>` and exports the result as a global
-environment variable (`set -gx`).
-
-Since the GPG agent is already unlocked earlier in the function, `pass show`
-won't prompt for the passphrase again.
-
-## Behavior
-
-- If `api-tokens.json` doesn't exist, the token loading step is silently skipped.
-- If a specific token can't be retrieved from `pass`, a warning is printed and
-  the remaining tokens are still loaded.
+That reads `api-tokens.json`, calls `pass show` for each entry, and
+`set -gx VAR value`. Missing `api-tokens.json` is skipped. A missing pass
+entry warns and continues.
 
 ## File locations
 
@@ -74,25 +49,5 @@ won't prompt for the passphrase again.
 |------|---------|
 | `~/.config/projects/keys.json` | SSH key paths mapped to `pass` entries |
 | `~/.config/projects/api-tokens.json` | Env var names mapped to `pass` entries |
-| `~/.config/fish/functions/keys-setup.fish` | The fish function |
-
-## Relevant code
-
-The token-loading block added to `keys-setup.fish`:
-
-```fish
-# Load API tokens from pass
-set -l api_tokens_file (dirname $KEY_CONFIG_FILE)/api-tokens.json
-if test -f $api_tokens_file
-    set -l token_vars (cat $api_tokens_file | jq -r 'keys[]')
-    for var in $token_vars
-        set -l passentry (cat $api_tokens_file | jq -r ".\"$var\"")
-        set -l token (pass show $passentry 2>/dev/null)
-        if test $status -eq 0
-            set -gx $var $token
-        else
-            echo "WARNING: failed to retrieve token for $var from pass entry '$passentry'"
-        end
-    end
-end
-```
+| `~/.local/bin/dottokens` | Mapping CLI |
+| `~/.config/fish/functions/keys-setup.fish` | Loader |

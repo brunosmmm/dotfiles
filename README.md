@@ -58,6 +58,7 @@ dotfiles-update           # $HOME → repo (interactive)
 dotfiles-push             # commit + push the dotfiles project
 dotfiles-pull             # pull the dotfiles project
 keys-setup                # SSH/GPG via keychain + API tokens from pass
+dottokens                 # list/add/remove API token bindings (pass)
 ```
 
 Direct CLI:
@@ -81,7 +82,7 @@ Passwords and tokens live in `pass`, not in git.
 | `~/.config/musikcube/settings.json` | **no** | session tokens; gitignored. Copy from `dot/config/musikcube/settings.json.example` |
 | `~/.ssh/config` | yes | host aliases |
 
-See [doc/api-tokens-setup.md](doc/api-tokens-setup.md) for token loading.
+See [doc/api-tokens-setup.md](doc/api-tokens-setup.md) for `dottokens` and `keys-setup`.
 
 **Last.fm:** session credentials were previously committed in
 `dot/config/musikcube/settings.json`. Revoke/rotate that Last.fm session at

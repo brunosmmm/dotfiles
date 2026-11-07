@@ -1,0 +1,430 @@
+#!/usr/bin/env python3
+"""Bind environment variables to pass(1) entries for keys-setup."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from typing import Dict, List, Optional, Sequence, Tuple
+
+try:
+    from rich.console import Console
+    from rich.prompt import Confirm, Prompt
+    from rich.table import Table
+except ImportError:
+    sys.stderr.write("dottokens requires the 'rich' package\n")
+    sys.exit(1)
+
+VAR_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+TOKENS_NAME = "api-tokens.json"
+
+console = Console()
+err_console = Console(stderr=True)
+
+
+class UserError(Exception):
+    """Expected failure with a message for the user."""
+
+
+def default_tokens_file() -> Path:
+    key_cfg = os.environ.get("KEY_CONFIG_FILE")
+    if key_cfg:
+        return Path(key_cfg).expanduser().parent / TOKENS_NAME
+    return Path.home() / ".config" / "projects" / TOKENS_NAME
+
+
+def pass_store_dir() -> Path:
+    raw = os.environ.get("PASSWORD_STORE_DIR")
+    if raw:
+        return Path(raw).expanduser()
+    return Path.home() / ".password-store"
+
+
+def pass_entry_file(path: str) -> Path:
+    return pass_store_dir() / f"{path}.gpg"
+
+
+def pass_entry_exists(path: str) -> bool:
+    return pass_entry_file(path).is_file()
+
+
+def list_pass_entries() -> List[str]:
+    store = pass_store_dir()
+    if not store.is_dir():
+        return []
+    entries: List[str] = []
+    for gpg in store.rglob("*.gpg"):
+        rel = gpg.relative_to(store)
+        entries.append(str(rel.with_suffix("")))
+    return sorted(entries)
+
+
+def validate_var(name: str) -> str:
+    name = name.strip()
+    if not VAR_RE.match(name):
+        raise UserError(
+            f"invalid variable name '{name}' "
+            "(use letters, digits, and underscore; must not start with a digit)"
+        )
+    return name
+
+
+def normalize_pass_path(path: str) -> str:
+    path = path.strip().strip("/")
+    parts = path.split("/")
+    if not path or any(part in ("", ".", "..") for part in parts):
+        raise UserError(f"invalid pass entry path '{path}'")
+    return "/".join(parts)
+
+
+def load_tokens(path: Path) -> Dict[str, str]:
+    if not path.exists():
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except json.JSONDecodeError as ex:
+        raise UserError(f"malformed JSON in {path}: {ex}") from ex
+    except OSError as ex:
+        raise UserError(f"could not read {path}: {ex}") from ex
+    if not isinstance(data, dict):
+        raise UserError(f"{path} must contain a JSON object")
+    tokens: Dict[str, str] = {}
+    for key, value in data.items():
+        if not isinstance(key, str) or not isinstance(value, str):
+            raise UserError(f"{path} values must be strings (env var → pass path)")
+        tokens[key] = value
+    return tokens
+
+
+def write_tokens(path: Path, tokens: Dict[str, str]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".api-tokens.", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(tokens, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp, path)
+        os.chmod(path, 0o600)
+    except Exception:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def is_tty() -> bool:
+    return sys.stdin.isatty() and sys.stdout.isatty()
+
+
+def bindings(tokens: Dict[str, str]) -> List[Tuple[str, str, bool]]:
+    rows = []
+    for var in sorted(tokens):
+        path = tokens[var]
+        rows.append((var, path, pass_entry_exists(path)))
+    return rows
+
+
+def print_table(rows: Sequence[Tuple[str, str, bool]]) -> None:
+    table = Table(title=None, box=None, pad_edge=False)
+    table.add_column("VAR", style="bold")
+    table.add_column("PASS ENTRY")
+    table.add_column("STORE")
+    for var, path, ok in rows:
+        store = "[green]ok[/green]" if ok else "[red]missing[/red]"
+        table.add_row(var, path, store)
+    console.print(table)
+
+
+def print_json(rows: Sequence[Tuple[str, str, bool]]) -> None:
+    payload = [
+        {"var": var, "path": path, "ok": ok} for var, path, ok in rows
+    ]
+    console.print_json(data=payload)
+
+
+def remind_keys_setup() -> None:
+    console.print(
+        "[dim]Run[/dim] keys-setup [dim]in this shell to refresh exported variables.[/dim]"
+    )
+
+
+def cmd_list(tokens: Dict[str, str], as_json: bool, names: bool) -> int:
+    rows = bindings(tokens)
+    if names:
+        for var, _, _ in rows:
+            console.print(var)
+        return 0
+    if as_json:
+        print_json(rows)
+        return 0
+    if not rows:
+        console.print("[dim]No tokens bound.[/dim]")
+        return 0
+    print_table(rows)
+    return 0
+
+
+def cmd_check(tokens: Dict[str, str], as_json: bool) -> int:
+    rows = bindings(tokens)
+    if as_json:
+        print_json(rows)
+    elif not rows:
+        console.print("[dim]No tokens bound.[/dim]")
+    else:
+        print_table(rows)
+    missing = [var for var, _, ok in rows if not ok]
+    if missing:
+        err_console.print(
+            f"[bold red]ERROR:[/bold red] {len(missing)} pass "
+            f"{'entry is' if len(missing) == 1 else 'entries are'} missing"
+        )
+        return 1
+    return 0
+
+
+def prompt_var(existing: Optional[str]) -> str:
+    if existing:
+        return validate_var(existing)
+    if not is_tty():
+        raise UserError("variable name required (not a tty)")
+    value = Prompt.ask("Variable name")
+    return validate_var(value)
+
+
+def prompt_path(existing: Optional[str]) -> str:
+    if existing:
+        return normalize_pass_path(existing)
+    if not is_tty():
+        raise UserError("pass entry path required (not a tty)")
+    entries = list_pass_entries()
+    if entries:
+        shown = entries[:30]
+        console.print("[dim]Store entries:[/dim]")
+        for entry in shown:
+            console.print(f"  [dim]{entry}[/dim]")
+        leftover = len(entries) - len(shown)
+        if leftover > 0:
+            console.print(f"  [dim]… {leftover} more[/dim]")
+    else:
+        console.print("[dim]Password store is empty or missing.[/dim]")
+    value = Prompt.ask("Pass entry")
+    return normalize_pass_path(value)
+
+
+def insert_pass_entry(path: str) -> None:
+    if shutil.which("pass") is None:
+        raise UserError("pass is not installed")
+    console.print(f"Creating [bold]{path}[/bold] with [bold]pass insert[/bold]…")
+    try:
+        result = subprocess_pass(["insert", path])
+    except OSError as ex:
+        raise UserError(f"failed to run pass: {ex}") from ex
+    if result != 0:
+        raise UserError(f"pass insert exited {result}")
+    if not pass_entry_exists(path):
+        raise UserError(f"pass insert did not create '{path}'")
+
+
+def subprocess_pass(args: List[str]) -> int:
+    return subprocess.call(["pass", *args])
+
+
+def cmd_add(
+    file_path: Path,
+    tokens: Dict[str, str],
+    var: Optional[str],
+    path: Optional[str],
+    insert: bool,
+    force: bool,
+) -> int:
+    var = prompt_var(var)
+    path = prompt_path(path)
+
+    if var in tokens and tokens[var] == path:
+        console.print(f"[dim]{var} is already bound to {path}[/dim]")
+        return 0
+    if var in tokens and not force:
+        raise UserError(
+            f"{var} is already bound to {tokens[var]} (use --force to replace)"
+        )
+
+    if not pass_entry_exists(path):
+        should_insert = insert
+        if not should_insert:
+            if not is_tty():
+                raise UserError(
+                    f"pass entry '{path}' does not exist (use --insert to create it)"
+                )
+            should_insert = Confirm.ask(
+                f"Entry [bold]{path}[/bold] does not exist. Create it with pass insert?",
+                default=True,
+            )
+        if not should_insert:
+            raise UserError("aborted")
+        insert_pass_entry(path)
+
+    others = [name for name, other in tokens.items() if other == path and name != var]
+    if others:
+        console.print(
+            f"[yellow]WARNING:[/yellow] also bound to this entry: {', '.join(others)}"
+        )
+
+    tokens[var] = path
+    write_tokens(file_path, tokens)
+    console.print(f"Bound [bold]{var}[/bold] → [bold]{path}[/bold]")
+    remind_keys_setup()
+    return 0
+
+
+def cmd_remove(
+    file_path: Path,
+    tokens: Dict[str, str],
+    var: str,
+    from_pass: bool,
+    yes: bool,
+) -> int:
+    var = validate_var(var)
+    if var not in tokens:
+        raise UserError(f"{var} is not bound")
+    path = tokens[var]
+    others = [name for name, other in tokens.items() if other == path and name != var]
+
+    if not yes:
+        if not is_tty():
+            raise UserError("refusing to remove without --yes (not a tty)")
+        if not Confirm.ask(f"Unbind [bold]{var}[/bold] → {path}?", default=True):
+            console.print("[dim]Aborted[/dim]")
+            return 0
+
+    if from_pass:
+        if others:
+            console.print(
+                f"[yellow]WARNING:[/yellow] still bound to this entry: {', '.join(others)}"
+            )
+        if shutil.which("pass") is None:
+            raise UserError("pass is not installed")
+        if pass_entry_exists(path):
+            if not yes and is_tty():
+                if not Confirm.ask(
+                    f"Also delete pass entry [bold]{path}[/bold]?", default=False
+                ):
+                    from_pass = False
+            if from_pass:
+                result = subprocess_pass(["rm", "-f", "--", path])
+                if result != 0:
+                    raise UserError(f"pass rm exited {result}")
+        else:
+            console.print(
+                f"[yellow]WARNING:[/yellow] pass entry '{path}' is already missing"
+            )
+
+    del tokens[var]
+    write_tokens(file_path, tokens)
+    console.print(f"Unbound [bold]{var}[/bold]")
+    remind_keys_setup()
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="dottokens",
+        description="Bind environment variables to pass(1) entries for keys-setup.",
+    )
+    parser.add_argument(
+        "-f",
+        "--file",
+        type=Path,
+        help=f"mapping file (default: $KEY_CONFIG_FILE directory / {TOKENS_NAME})",
+    )
+    parser.add_argument(
+        "--json", action="store_true", help="machine-readable list/check output"
+    )
+    parser.add_argument(
+        "--names", action="store_true", help="print bound variable names only"
+    )
+    sub = parser.add_subparsers(dest="cmd")
+
+    sub.add_parser("list", help="list bindings")
+
+    add_p = sub.add_parser("add", help="bind a variable to a pass entry")
+    add_p.add_argument("var", nargs="?", help="environment variable name")
+    add_p.add_argument("path", nargs="?", help="pass entry path")
+    add_p.add_argument(
+        "--insert",
+        action="store_true",
+        help="create the pass entry if it is missing",
+    )
+    add_p.add_argument(
+        "--force",
+        action="store_true",
+        help="replace an existing binding for this variable",
+    )
+
+    rm_p = sub.add_parser(
+        "remove", aliases=["rm"], help="unbind a variable"
+    )
+    rm_p.add_argument("var", help="environment variable name")
+    rm_p.add_argument(
+        "--from-pass",
+        action="store_true",
+        help="also delete the pass entry",
+    )
+    rm_p.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="do not prompt for confirmation",
+    )
+
+    sub.add_parser("check", help="verify every binding exists in pass")
+    return parser
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    file_path = (args.file or default_tokens_file()).expanduser()
+    cmd = args.cmd or "list"
+    try:
+        tokens = load_tokens(file_path)
+        if cmd == "list":
+            return cmd_list(tokens, args.json, args.names)
+        if cmd == "check":
+            return cmd_check(tokens, args.json)
+        if cmd == "add":
+            return cmd_add(
+                file_path,
+                tokens,
+                args.var,
+                args.path,
+                args.insert,
+                args.force,
+            )
+        if cmd in ("remove", "rm"):
+            return cmd_remove(
+                file_path, tokens, args.var, args.from_pass, args.yes
+            )
+        parser.print_usage()
+        return 2
+    except UserError as ex:
+        err_console.print(f"[bold red]ERROR:[/bold red] {ex}")
+        return 1
+    except KeyboardInterrupt:
+        console.print()
+        console.print("[dim]Aborted[/dim]")
+        return 130
+
+
+if __name__ == "__main__":
+    sys.exit(main())
